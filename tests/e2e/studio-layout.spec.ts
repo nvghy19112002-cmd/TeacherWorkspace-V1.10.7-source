@@ -21,28 +21,38 @@ test('studio rail and panel widths persist; virtual scrolling reaches the final 
   await page.reload();
   await page.getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true }).click();
   await expect(handle).toHaveAttribute('aria-valuenow', after!);
+  const bounds = await handle.boundingBox();
+  await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds!.x + bounds!.width / 2 - 30, bounds!.y + bounds!.height / 2, {
+    steps: 5,
+  });
+  await page.mouse.up();
+  await expect(handle).toHaveAttribute('aria-valuenow', String(Number(after) + 30));
   await page.evaluate(async () => {
     const store = '/src/modules/question-bank/store.ts',
       parser = '/src/modules/question-bank/domain/parser.ts';
     const { useQuestionBank } = await import(store),
       { parseExTest, parsedToQuestion } = await import(parser);
-    await useQuestionBank
-      .getState()
-      .commit((s: Record<string, unknown>) => ({
-        ...s,
-        questions: Array.from({ length: 50 }, (_, i) =>
-          parsedToQuestion(parseExTest(`\\begin{ex}Virtual sentinel ${i + 1}\\end{ex}`)[0]),
-        ),
-      }));
+    await useQuestionBank.getState().commit((s: Record<string, unknown>) => ({
+      ...s,
+      questions: Array.from({ length: 50 }, (_, i) => ({
+        ...parsedToQuestion(parseExTest(`\\begin{ex}Virtual sentinel ${i + 1}\\end{ex}`)[0]),
+        id: `virtual-${String(i + 1).padStart(3, '0')}`,
+        updatedAt: '2026-10-17T00:00:00.000Z',
+      })),
+    }));
   });
   const table = page.locator('.qb-question-table');
   await expect(table).toHaveAttribute('data-page-row-count', '50');
-  await table.evaluate((node) => {
+  await page.locator('.qb-table-wrap').evaluate((node) => {
     node.scrollTop = node.scrollHeight;
     node.dispatchEvent(new Event('scroll'));
   });
   await expect(table).toContainText('Virtual sentinel 50');
+  await expect(table.locator('tr[data-question-id="virtual-050"]')).toBeInViewport();
   await expect(page.locator('.qb-question-table tr[data-question-id]')).not.toHaveCount(50);
+  await page.screenshot({ path: 'test-results/studio-bank.png', fullPage: true });
   await page.getByRole('button', { name: 'AI phân loại', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'AI phân loại câu hỏi', exact: true }),

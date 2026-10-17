@@ -11,4 +11,12 @@
 
 244 Vitest tests / 31 files và 14 release tests, lint/TypeScript/build đạt. Các fixture TeX thật vẫn nằm trong suite. E2E mục tiêu: PDF TikZ thật render thành ảnh, cùng nhãn nhưng bytes khác không lẫn cache, xóa cache; corpus 200 câu vẫn render không tràn; native bridge mock kiểm tra hình A biến mất khi nguồn B đang chờ và khi B lỗi. 3 E2E đạt, 1 optional corpus-PDF case bỏ qua do chưa có CORPUS_TEX_DIR. Mock bridge không được coi là thử native Windows thật.
 
-Giới hạn: file ảnh thiếu phải được bổ sung vào dự án TeX; metadata không tạo ra ảnh. Chưa chứng nhận raster toàn bộ 237 hình corpus hoặc installer Windows V2.
+Kiểm tra bổ sung sau checkpoint M3: xelatex thật biên dịch 238 wrapper hình; 237 đạt,
+1 lỗi tại hình 49 do macro dự án `\IntervalLR` / `\IntervalGRF` chưa được khai báo.
+Không tự bịa định nghĩa có thể làm sai hình. Cần preamble gốc của giáo viên cho ca này.
+Toàn bộ 237 PDF thành công đã qua production raster renderer trong Playwright
+(1 test đạt, 2,2 phút). Script corpus trả exit code khác 0 nếu còn lỗi và giữ diagnostics
+từng hình. Đây không phải kết quả 238/238 đạt.
+
+Giới hạn: file ảnh thiếu phải được bổ sung vào dự án TeX; metadata không tạo ra ảnh.
+Chưa xác thực installer Windows V2.

@@ -1,5 +1,11 @@
 # Teacher Workspace
 
+## V2.0.0 · Academic Desktop Studio
+
+AI retry và queue bền vững, prompt phiên bản, tìm kiếm SQLite, preview có kiểm tra cache, giao diện mới và tạo đề theo ma trận với snapshot bất biến. Xem [bắt đầu](START_HERE.md), [changelog](docs/v2/CHANGELOG.md), [kiểm thử](docs/v2/TEST_REPORT.md), [migration/build](docs/v2/MIGRATION_AND_BUILD.md) và [giới hạn còn lại](docs/v2/KNOWN_LIMITATIONS.md). Mã nguồn V2 chưa đồng nghĩa installer đã được build hoặc release đã công khai; cần kết quả Windows Actions thực tế.
+
+Các mục V1 bên dưới là lịch sử, không mô tả chính sách key/quota hiện tại của V2.
+
 ## V1.10.8 · Chuẩn bị kênh cập nhật mới
 
 Phát triển theo [DEVELOPMENT.md](docs/DEVELOPMENT.md), phát hành theo [AUTO_RELEASE.md](docs/AUTO_RELEASE.md). Kênh mới dùng GitHub Releases của repository mã nguồn và khóa ký mới; người dùng cần cài thủ công bản chuyển tiếp một lần. Các bản sau tải và cài qua mục Cập nhật trong app. Bản này đang được chuẩn bị, chưa xác thực build/cài Windows hoặc phát hành trên GitHub.
