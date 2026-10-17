@@ -1,0 +1,1392 @@
+.qb-page {
+  min-width: 0;
+}
+
+.qb-mathhub-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) 28px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.qb-command-header {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 96%, var(--accent) 4%);
+}
+
+.qb-title-block {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 9px;
+  min-width: max-content;
+}
+
+.qb-title-block > span {
+  grid-column: 1 / -1;
+  color: var(--accent);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.qb-title-block h1 {
+  font-size: 19px;
+  letter-spacing: -0.55px;
+  line-height: 1.15;
+}
+
+.qb-title-block small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.qb-command-actions,
+.qb-selection-tools,
+.qb-detail-buttons,
+.qb-detail-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qb-command-actions {
+  justify-content: flex-end;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.qb-command-actions .button {
+  min-height: 32px;
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+.qb-selection-tools {
+  padding-right: 8px;
+  margin-right: 2px;
+  border-right: 1px solid var(--border);
+}
+
+.qb-selection-tools strong {
+  color: var(--accent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.qb-selection-tools button,
+.qb-duplicate-button,
+.qb-detail-buttons button,
+.qb-detail-tabs button {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.qb-selection-tools button:hover,
+.qb-duplicate-button:hover,
+.qb-detail-buttons button:hover,
+.qb-detail-tabs button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.qb-selection-tools button.accent,
+.qb-detail-buttons button.copy {
+  color: #187c57;
+  border-color: #3cac7f78;
+  background: #3cac7f12;
+}
+
+.qb-selection-tools button.danger,
+.qb-detail-buttons button.danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.qb-duplicate-button {
+  color: #4e93be;
+  border-color: #4e93be70;
+  background: #4e93be12;
+}
+
+.qb-import-button {
+  cursor: pointer;
+}
+
+.qb-mathhub-shell {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 0.95fr) minmax(0, 1.2fr);
+  background: var(--bg);
+}
+
+.qb-mathhub-filters,
+.qb-bank-main,
+.qb-question-detail {
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.qb-mathhub-filters {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 11px;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.qb-filter-field {
+  display: grid;
+  gap: 4px;
+}
+
+.qb-filter-field > span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
+.qb-filter-field select {
+  min-height: 34px;
+  height: 34px;
+  width: 100%;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: var(--soft);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qb-reset-button {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 2px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  color: var(--danger);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.qb-filter-count {
+  padding: 8px 4px 2px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  text-align: center;
+  font-size: 10px;
+}
+
+.qb-bank-main {
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 34px minmax(0, 1fr);
+  border-right: 1px solid var(--border);
+}
+
+.qb-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 7px;
+  padding: 10px 10px 5px;
+}
+
+.qb-search-row label {
+  min-width: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.qb-search-row input {
+  min-width: 0;
+  width: 100%;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+}
+
+.qb-search-row input:focus-visible {
+  outline: none;
+}
+
+.qb-search-mode {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.qb-page-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.qb-page-controls button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.qb-table-wrap {
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+.qb-question-table {
+  min-width: 480px;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 10px;
+}
+
+.qb-question-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 34px;
+  padding: 6px 7px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--soft) 92%, var(--surface));
+  color: var(--muted);
+  text-align: left;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.qb-question-table td {
+  height: 34px;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qb-question-table tbody tr {
+  cursor: pointer;
+}
+
+.qb-question-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent-soft) 45%, transparent);
+}
+
+.qb-question-table tbody tr.active {
+  background: color-mix(in srgb, var(--accent-soft) 82%, transparent);
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+.qb-question-table .check-column,
+.qb-question-table td:first-child {
+  width: 34px;
+  text-align: center;
+}
+
+.qb-question-table .number-column,
+.qb-question-table td:nth-child(2) {
+  width: 42px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.qb-question-table th:nth-child(3) {
+  width: 92px;
+}
+
+.qb-question-table th:nth-child(4) {
+  width: 85px;
+}
+
+.qb-question-table th:nth-child(5) {
+  width: 98px;
+}
+
+.qb-question-table th:nth-child(6) {
+  width: 55px;
+}
+
+.qb-question-table .image-column,
+.qb-question-table td:last-child {
+  width: 32px;
+  text-align: center;
+}
+
+.qb-question-table input[type='checkbox'] {
+  width: 14px;
+  min-height: 14px;
+}
+
+.id-cell {
+  color: #3e92c9;
+  font-weight: 800;
+}
+
+.answer-cell {
+  color: var(--muted);
+  text-align: center;
+}
+
+.qb-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.level-n {
+  color: #45a86f;
+  background: #45a86f1a;
+}
+
+.level-h {
+  color: #4d91d8;
+  background: #4d91d81a;
+}
+
+.level-v {
+  color: #d29245;
+  background: #d292451a;
+}
+
+.level-c {
+  color: #d85762;
+  background: #d857621a;
+}
+
+.type-multiple_choice {
+  color: #5c93cf;
+  background: #5c93cf19;
+}
+
+.type-true_false {
+  color: #45a968;
+  background: #45a96818;
+}
+
+.type-short_answer {
+  color: #b76bc9;
+  background: #b76bc919;
+}
+
+.type-essay,
+.type-multi_part {
+  color: #8a918e;
+  background: #8a918e20;
+}
+
+.qb-question-detail {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.qb-detail-toolbar {
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.qb-detail-tabs button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.qb-detail-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  border-radius: 0;
+}
+
+.qb-detail-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 11px 2px;
+}
+
+.qb-detail-identity strong {
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.qb-detail-identity span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.qb-detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.qb-path-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.qb-zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.qb-zoom-control input {
+  width: 66px;
+  min-height: auto;
+  padding: 0;
+}
+
+.qb-detail-content {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 17px 19px;
+  background: color-mix(in srgb, var(--surface) 97%, var(--accent) 3%);
+}
+
+.qb-mathhub-tree {
+  min-height: 60vh;
+}
+.qb-mathhub-tree > .field {
+  max-width: 360px;
+}
+.qb-mathhub-branches,
+.qb-mathhub-branches ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.qb-mathhub-branches ul {
+  margin-left: 23px;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+}
+.qb-mathhub-node {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+.qb-mathhub-node:hover {
+  background: var(--soft);
+}
+.qb-mathhub-node code {
+  min-width: 30px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.qb-mathhub-node small {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.qb-inline-tex {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.qb-inline-tex-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.qb-inline-tex-toolbar .button {
+  flex-shrink: 0;
+}
+.qb-inline-tex-pdf {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 520px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+}
+.qb-inline-tex .qb-tex-log {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.qb-preview {
+  display: grid;
+  gap: 13px;
+  line-height: 1.75;
+  color: var(--text);
+  font-family: Cambria, 'Times New Roman', serif;
+}
+
+.qb-preview-question {
+  white-space: pre-wrap;
+}
+
+.qb-preview-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px 14px;
+  counter-reset: answer;
+}
+
+.qb-preview-choice {
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--soft) 78%, transparent);
+}
+
+.qb-preview-choice.correct {
+  color: #36995c;
+  background: #3da8671d;
+  font-weight: 700;
+}
+
+.qb-preview-choice b {
+  margin-right: 5px;
+  color: #4d91d8;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.qb-preview-answer {
+  color: #36a664;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.92em;
+  font-weight: 800;
+}
+
+.qb-preview-solution {
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.qb-preview-solution h3 {
+  margin-bottom: 6px;
+  color: #4d91d8;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.95em;
+}
+
+.qb-source-view {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 0.72em;
+  line-height: 1.65;
+}
+
+.qb-empty-detail,
+.qb-empty-table {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 9px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.qb-empty-detail {
+  grid-row: 1 / -1;
+}
+
+.qb-empty-table {
+  min-height: 240px;
+}
+
+.qb-empty-table button {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.qb-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 11px;
+  background: color-mix(in srgb, var(--accent) 85%, #217ebd);
+  color: white;
+  font-size: 9px;
+}
+
+.qb-statusbar .backend-ok {
+  margin-left: auto;
+}
+
+.qb-saving {
+  position: fixed;
+  z-index: 100;
+  right: 24px;
+  bottom: 24px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.qb-duplicate-modal {
+  min-height: 360px;
+}
+
+.qb-duplicate-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.qb-duplicate-summary span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.qb-duplicate-results {
+  display: grid;
+  max-height: 410px;
+  overflow: auto;
+}
+
+.qb-duplicate-results > button {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.qb-duplicate-results > button:hover {
+  background: var(--accent-soft);
+}
+
+.qb-duplicate-results b {
+  color: var(--accent);
+}
+
+.qb-duplicate-results small {
+  color: var(--muted);
+}
+
+/* Editor remains available, but is no longer a separate bank workspace. */
+.modal.wide.qb-curriculum-dialog {
+  width: min(1160px, calc(100vw - 30px));
+}
+
+.qb-curriculum-dialog-body {
+  padding: 14px;
+}
+
+.qb-curriculum-layout {
+  display: grid;
+  grid-template-columns: minmax(270px, 0.85fr) minmax(0, 1.35fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.qb-curriculum-layout .panel,
+.qb-mathhub-tree {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.qb-curriculum-main {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.qb-curriculum-layout .qb-panel-title,
+.qb-mathhub-tree .qb-panel-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.qb-curriculum-layout .qb-panel-title > div,
+.qb-mathhub-tree .qb-panel-title > div {
+  flex: 1 1 180px;
+}
+
+.qb-curriculum-layout h2,
+.qb-mathhub-tree h2 {
+  font-size: 16px;
+}
+
+.qb-curriculum-layout p,
+.qb-mathhub-tree p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.qb-tree-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.qb-tree-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.qb-tree {
+  overflow: auto;
+  max-height: min(60vh, 680px);
+  margin-top: 10px;
+}
+
+.qb-tree-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: 7px;
+}
+
+.qb-tree-item.active {
+  background: var(--accent-soft);
+}
+.qb-tree-item.archived {
+  opacity: 0.55;
+}
+.qb-tree-item:hover {
+  background: var(--soft);
+}
+
+.qb-tree-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  height: 32px;
+  color: var(--muted);
+}
+
+.qb-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+  padding: 7px 4px;
+}
+
+.qb-tree-row span {
+  color: var(--accent);
+  font-weight: 650;
+}
+.qb-tree-row strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qb-tree-row small {
+  color: var(--muted);
+}
+.qb-outcome-add {
+  display: grid;
+  gap: 7px;
+}
+.qb-outcomes {
+  max-height: 130px;
+  overflow: auto;
+  margin-top: 10px;
+}
+.qb-outcomes > div {
+  display: flex;
+  gap: 8px;
+  padding: 5px 0;
+}
+.qb-json-input {
+  width: 100%;
+  margin: 10px 0;
+}
+.qb-mathhub-branches {
+  max-height: 60vh;
+  overflow: auto;
+}
+.qb-mathhub-branches ul {
+  padding-left: 20px;
+}
+.qb-mathhub-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  text-align: left;
+}
+.qb-mathhub-node span:nth-of-type(2) {
+  flex: 1;
+}
+
+@media (max-width: 730px) {
+  .qb-curriculum-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qb-tree {
+    max-height: 35vh;
+  }
+}
+
+.qb-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(250px, 0.7fr);
+  gap: 16px;
+}
+
+.qb-editor-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.qb-source-editor {
+  width: 100%;
+  min-height: 430px;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.qb-metadata-fields {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+
+.qb-editor-optional {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+}
+
+.qb-editor-optional > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.qb-editor-optional[open] > summary {
+  margin-bottom: 10px;
+}
+
+.qb-editor-optional > .field + .field {
+  margin-top: 9px;
+}
+
+.qb-batch-order ol {
+  max-height: 160px;
+  overflow-y: auto;
+  padding-inline-start: 24px;
+}
+
+.qb-batch-order li {
+  margin: 5px 0;
+}
+
+.qb-batch-order button {
+  margin-left: 5px;
+}
+
+.qb-id-preview {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.qb-id-preview span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.qb-id-preview strong {
+  color: var(--accent);
+  font-size: 12px;
+}
+
+/* Size against the actual workspace, including the application's sidebar. */
+.main-shell:has(.qb-mathhub-layout) {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.main-shell:has(.qb-mathhub-layout) > .topbar {
+  height: 44px;
+  min-height: 44px;
+  padding-inline: 12px;
+  flex: 0 0 auto;
+}
+.main-content:has(.qb-mathhub-layout) {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 8px 10px 10px;
+  container-type: inline-size;
+  container-name: question-workspace;
+}
+.qb-search-mode {
+  display: none;
+}
+.qb-mathhub-shell {
+  min-width: 0;
+  overflow: hidden;
+}
+.qb-table-wrap {
+  min-width: 0;
+  isolation: isolate;
+}
+.qb-command-header {
+  flex-wrap: wrap;
+}
+.qb-selection-tools {
+  flex-wrap: wrap;
+}
+.qb-detail-identity,
+.qb-detail-meta-row {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.qb-detail-content .qb-preview {
+  overflow-wrap: anywhere;
+}
+.qb-preview-choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.qb-preview .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.qb-question-warnings {
+  flex-shrink: 0;
+  max-height: 120px;
+  overflow: auto;
+}
+.qb-statusbar {
+  background: var(--soft);
+  color: var(--muted);
+  overflow: auto;
+  white-space: nowrap;
+}
+@container question-workspace (max-width: 920px) {
+  .qb-mathhub-layout {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .qb-mathhub-shell {
+    flex: 0 0 auto;
+    grid-template-columns: 170px minmax(0, 1fr);
+    overflow: visible;
+  }
+  .qb-mathhub-filters,
+  .qb-bank-main {
+    height: 440px;
+  }
+  .qb-question-detail {
+    grid-column: 1 / -1;
+    height: 500px;
+    border-top: 1px solid var(--border);
+  }
+  .qb-command-header,
+  .qb-statusbar {
+    flex-shrink: 0;
+  }
+  .qb-editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container question-workspace (max-width: 560px) {
+  .qb-mathhub-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qb-mathhub-filters {
+    height: 210px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .qb-command-actions {
+    justify-content: flex-start;
+  }
+  .qb-preview-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.qb-import-review {
+  max-height: 48vh;
+  overflow: auto;
+}
+.qb-import-review > div {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.qb-import-review small {
+  display: block;
+  margin: 6px 0;
+}
+.qb-import-review p,
+.qb-question-warnings p {
+  overflow-wrap: anywhere;
+}
+.qb-question-warnings {
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+.qb-tex-live {
+  max-height: 72vh;
+  overflow: auto;
+}
+.qb-tex-path {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  margin: 8px 0;
+}
+.qb-tex-path .field {
+  flex: 1;
+  min-width: 0;
+}
+.qb-tex-pdf {
+  width: 100%;
+  height: 55vh;
+  border: 1px solid var(--border);
+  background: white;
+}
+.qb-tex-log,
+.qb-tex-error-source {
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.qb-tex-error-source .error-line {
+  background: #ffd2cb;
+  color: #571006;
+  display: block;
+}
+
+.qb-tex-ready {
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--soft);
+}
+
+.qb-tex-diagnostics {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, #d68a00 45%, var(--border));
+  border-radius: 11px;
+  background: color-mix(in srgb, #d68a00 8%, var(--surface));
+}
+
+.qb-tex-diagnostics h3,
+.qb-tex-diagnostics p {
+  margin: 0;
+}
+
+.qb-ai-scan {
+  max-height: 64vh;
+  overflow: auto;
+}
+.qb-ai-result {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.qb-detail-buttons {
+  flex-wrap: wrap;
+}
+
+/* V1.6 question workspace skin. */
+.qb-mathhub-layout {
+  border-color: var(--border);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--surface) 96%, var(--bg));
+  box-shadow:
+    0 12px 35px #10182712,
+    0 1px 2px #10182714;
+}
+
+.qb-command-header {
+  min-height: 52px;
+  padding: 7px 10px 7px 13px;
+  background: color-mix(in srgb, var(--surface) 88%, var(--soft));
+}
+
+.qb-title-block > span {
+  color: var(--muted);
+  letter-spacing: 0.13em;
+}
+.qb-title-block h1 {
+  font-size: 18px;
+  font-weight: 680;
+  letter-spacing: -0.45px;
+}
+.qb-command-actions .button,
+.qb-selection-tools button,
+.qb-duplicate-button,
+.qb-detail-buttons button,
+.qb-detail-tabs button {
+  border-radius: 8px;
+  font-weight: 620;
+}
+
+.qb-command-actions .button.primary {
+  color: white;
+}
+.qb-duplicate-button {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+  background: var(--accent-soft);
+}
+.qb-mathhub-shell {
+  background: var(--surface);
+}
+.qb-mathhub-filters {
+  padding: 10px;
+  gap: 7px;
+  background: color-mix(in srgb, var(--soft) 72%, var(--surface));
+}
+.qb-filter-field > span {
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.qb-filter-field select {
+  background: color-mix(in srgb, var(--surface) 88%, var(--soft));
+  border-radius: 8px;
+}
+.qb-reset-button {
+  border-radius: 8px;
+}
+.qb-search-row {
+  background: color-mix(in srgb, var(--surface) 92%, var(--soft));
+}
+.qb-search-row label {
+  border-radius: 8px;
+  background: var(--soft);
+}
+.qb-page-controls {
+  background: color-mix(in srgb, var(--surface) 90%, var(--soft));
+}
+
+.qb-question-table th {
+  background: color-mix(in srgb, var(--soft) 90%, var(--surface));
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.qb-question-table tbody tr {
+  transition:
+    background 100ms ease,
+    box-shadow 100ms ease;
+}
+.qb-question-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+.qb-question-table tbody tr.active {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+.qb-badge {
+  border-radius: 999px;
+  font-weight: 620;
+}
+.qb-question-detail {
+  background: color-mix(in srgb, var(--surface) 97%, var(--soft));
+}
+.qb-detail-toolbar {
+  min-height: 42px;
+  background: color-mix(in srgb, var(--soft) 64%, var(--surface));
+}
+.qb-detail-tabs {
+  padding: 2px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--border) 45%, transparent);
+}
+.qb-detail-tabs button {
+  min-height: 27px;
+  border: 0;
+  border-radius: 7px;
+}
+.qb-detail-tabs button.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px #00000018;
+}
+.qb-detail-content {
+  padding: 17px 20px;
+  background: var(--surface);
+}
+.qb-preview-choice {
+  border-color: var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+}
+.qb-preview-choice.correct {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--text);
+}
+.qb-preview-answer {
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.qb-statusbar {
+  height: 26px;
+  background: color-mix(in srgb, var(--soft) 82%, var(--surface));
+  border-top: 1px solid var(--border);
+}
+.qb-statusbar .backend-ok {
+  color: #2f9e64;
+}
+.qb-saving {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 93%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+.qb-ai-result {
+  padding: 11px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--soft);
+}
+.qb-tex-pdf {
+  border-radius: 10px;
+}
+
+.qb-preview-table-wrap { display: block; max-width: 100%; overflow-x: auto; margin: 14px 0; white-space: normal; }
+.qb-preview-table { border-collapse: collapse; width: max-content; min-width: 100%; font: inherit; }
+.qb-preview-table td { border: 1px solid var(--border); padding: 8px 12px; text-align: center; }
+.qb-preview-table tr:first-child { background: var(--soft); font-weight: 600; }
+.qb-preview .qb-math { max-width: 100%; }
+
+.qb-preview { min-width: 0; overflow-wrap: anywhere; }
+.qb-preview .qb-math { display: inline-block; vertical-align: middle; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding-block: 2px; }
+.qb-preview .qb-math.display { display: block; }

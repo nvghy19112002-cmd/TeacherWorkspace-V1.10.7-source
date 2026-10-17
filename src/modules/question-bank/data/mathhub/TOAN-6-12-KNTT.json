@@ -1,0 +1,1432 @@
+{
+  "format": {
+    "separator": "-",
+    "open": "[",
+    "close": "]",
+    "levelOpen": "(",
+    "levelClose": ")",
+    "readSeparators": "-_*.·/|,;:+ ()",
+    "readWrappers": [
+      [
+        "[",
+        "]"
+      ],
+      [
+        "(",
+        ")"
+      ],
+      [
+        "<",
+        ">"
+      ],
+      [
+        "{",
+        "}"
+      ]
+    ]
+  },
+  "nodes": [
+    {
+      "code": "6",
+      "name": "Lớp 6",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Tập hợp các số tự nhiên",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Tập hợp",
+              "children": [
+                {
+                  "code": "1",
+                  "name": "Dạng 1: Viết tập hợp, nhận biết phần tử của tập hợp"
+                },
+                {
+                  "code": "2",
+                  "name": "Dạng 2: Tập hợp con"
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Cách ghi số tự nhiên"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Thứ tự trong tập hợp các số tự nhiên"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Phép cộng và phép trừ số tự nhiên"
+            },
+            {
+              "code": "5",
+              "name": "Bài 5: Phép nhân và phép chia số tự nhiên"
+            },
+            {
+              "code": "6",
+              "name": "Bài 6: Luỹ thừa với số mũ tự nhiên"
+            },
+            {
+              "code": "7",
+              "name": "Bài 7: Thứ tự thực hiện các phép tính"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Tính chia hết trong tập hợp các số tự nhiên",
+          "children": [
+            {
+              "code": "8",
+              "name": "Bài 8: Quan hệ chia hết và tính chất"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Dấu hiệu chia hết"
+            },
+            {
+              "code": "10",
+              "name": "Bài 10: Số nguyên tố"
+            },
+            {
+              "code": "11",
+              "name": "Bài 11: Ước chung. Ước chung lớn nhất"
+            },
+            {
+              "code": "12",
+              "name": "Bài 12: Bội chung. Bội chung nhỏ nhất"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Số nguyên",
+          "children": [
+            {
+              "code": "13",
+              "name": "Bài 13: Tập hợp các số nguyên"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Phép cộng và phép trừ số nguyên"
+            },
+            {
+              "code": "15",
+              "name": "Bài 15: Quy tắc dấu ngoặc"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Phép nhân số nguyên"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Phép chia hết. Ước và bội của một số nguyên"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Một số hình phẳng trong thực tiễn",
+          "children": [
+            {
+              "code": "18",
+              "name": "Bài 18: Hình tam giác đều. Hình vuông. Hình lục giác đều"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Hình chữ nhật. Hình thoi. Hình bình hành. Hình thang cân"
+            },
+            {
+              "code": "20",
+              "name": "Bài 20: Chu vi và diện tích của một số tứ giác đã học"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Tính đối xứng của hình phẳng trong tự nhiên",
+          "children": [
+            {
+              "code": "21",
+              "name": "Bài 21: Hình có trục đối xứng"
+            },
+            {
+              "code": "22",
+              "name": "Bài 22: Hình có tâm đối xứng"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Phân số",
+          "children": [
+            {
+              "code": "23",
+              "name": "Bài 23: Mở rộng phân số. Phân số bằng nhau"
+            },
+            {
+              "code": "24",
+              "name": "Bài 24: So sánh phân số. Hỗn số dương"
+            },
+            {
+              "code": "25",
+              "name": "Bài 25: Phép cộng và phép trừ phân số"
+            },
+            {
+              "code": "26",
+              "name": "Bài 26: Phép nhân và phép chia phân số"
+            },
+            {
+              "code": "27",
+              "name": "Bài 27: Hai bài toán về phân số"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Số thập phân",
+          "children": [
+            {
+              "code": "28",
+              "name": "Bài 28: Số thập phân"
+            },
+            {
+              "code": "29",
+              "name": "Bài 29: Tính toán với số thập phân"
+            },
+            {
+              "code": "30",
+              "name": "Bài 30: Làm tròn và ước lượng"
+            },
+            {
+              "code": "31",
+              "name": "Bài 31: Một số bài toán về tỉ số và tỉ số phần trăm"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Những hình học cơ bản",
+          "children": [
+            {
+              "code": "32",
+              "name": "Bài 32: Điểm và đường thẳng"
+            },
+            {
+              "code": "33",
+              "name": "Bài 33: Điểm nằm giữa hai điểm. Tia"
+            },
+            {
+              "code": "34",
+              "name": "Bài 34: Đoạn thẳng. Độ dài đoạn thẳng"
+            },
+            {
+              "code": "35",
+              "name": "Bài 35: Trung điểm của đoạn thẳng"
+            },
+            {
+              "code": "36",
+              "name": "Bài 36: Góc"
+            },
+            {
+              "code": "37",
+              "name": "Bài 37: Số đo góc"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Dữ liệu và xác suất thực nghiệm",
+          "children": [
+            {
+              "code": "38",
+              "name": "Bài 38: Dữ liệu và thu thập dữ liệu"
+            },
+            {
+              "code": "39",
+              "name": "Bài 39: Bảng thống kê và biểu đồ tranh"
+            },
+            {
+              "code": "40",
+              "name": "Bài 40: Biểu đồ cột"
+            },
+            {
+              "code": "41",
+              "name": "Bài 41: Biểu đồ cột kép"
+            },
+            {
+              "code": "42",
+              "name": "Bài 42: Kết quả có thể và sự kiện trong trò chơi, thí nghiệm"
+            },
+            {
+              "code": "43",
+              "name": "Bài 43: Xác suất thực nghiệm"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "7",
+      "name": "Lớp 7",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Số hữu tỉ",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Tập hợp các số hữu tỉ"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Cộng, trừ, nhân, chia số hữu tỉ"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Luỹ thừa với số mũ tự nhiên của một số hữu tỉ"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Thứ tự thực hiện các phép tính. Quy tắc chuyển vế"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Số thực",
+          "children": [
+            {
+              "code": "5",
+              "name": "Bài 5: Làm quen với số thập phân vô hạn tuần hoàn"
+            },
+            {
+              "code": "6",
+              "name": "Bài 6: Số vô tỉ. Căn bậc hai số học"
+            },
+            {
+              "code": "7",
+              "name": "Bài 7: Tập hợp các số thực"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Góc và đường thẳng song song",
+          "children": [
+            {
+              "code": "8",
+              "name": "Bài 8: Góc ở vị trí đặc biệt. Tia phân giác của một góc"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Hai đường thẳng song song và dấu hiệu nhận biết"
+            },
+            {
+              "code": "10",
+              "name": "Bài 10: Tiên đề Euclid. Tính chất của hai đường thẳng song song"
+            },
+            {
+              "code": "11",
+              "name": "Bài 11: Định lí và chứng minh định lí"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Tam giác bằng nhau",
+          "children": [
+            {
+              "code": "12",
+              "name": "Bài 12: Tổng các góc trong một tam giác"
+            },
+            {
+              "code": "13",
+              "name": "Bài 13: Hai tam giác bằng nhau. Trường hợp bằng nhau thứ nhất của tam giác"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Trường hợp bằng nhau thứ hai và thứ ba của tam giác"
+            },
+            {
+              "code": "15",
+              "name": "Bài 15: Các trường hợp bằng nhau của tam giác vuông"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Tam giác cân. Đường trung trực của đoạn thẳng"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Thu thập và biểu diễn dữ liệu",
+          "children": [
+            {
+              "code": "17",
+              "name": "Bài 17: Thu thập và phân loại dữ liệu"
+            },
+            {
+              "code": "18",
+              "name": "Bài 18: Biểu đồ hình quạt tròn"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Biểu đồ đoạn thẳng"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Tỉ lệ thức và đại lượng tỉ lệ",
+          "children": [
+            {
+              "code": "20",
+              "name": "Bài 20: Tỉ lệ thức"
+            },
+            {
+              "code": "21",
+              "name": "Bài 21: Tính chất của dãy tỉ số bằng nhau"
+            },
+            {
+              "code": "22",
+              "name": "Bài 22: Đại lượng tỉ lệ thuận"
+            },
+            {
+              "code": "23",
+              "name": "Bài 23: Đại lượng tỉ lệ nghịch"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Biểu thức đại số và đa thức một biến",
+          "children": [
+            {
+              "code": "24",
+              "name": "Bài 24: Biểu thức đại số"
+            },
+            {
+              "code": "25",
+              "name": "Bài 25: Đa thức một biến"
+            },
+            {
+              "code": "26",
+              "name": "Bài 26: Phép cộng và phép trừ đa thức một biến"
+            },
+            {
+              "code": "27",
+              "name": "Bài 27: Phép nhân đa thức một biến"
+            },
+            {
+              "code": "28",
+              "name": "Bài 28: Phép chia đa thức một biến"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Làm quen với biến cố và xác suất của biến cố",
+          "children": [
+            {
+              "code": "29",
+              "name": "Bài 29: Làm quen với biến cố"
+            },
+            {
+              "code": "30",
+              "name": "Bài 30: Làm quen với xác suất của biến cố"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Quan hệ giữa các yếu tố trong một tam giác",
+          "children": [
+            {
+              "code": "31",
+              "name": "Bài 31: Quan hệ giữa góc và cạnh đối diện trong một tam giác"
+            },
+            {
+              "code": "32",
+              "name": "Bài 32: Quan hệ giữa đường vuông góc và đường xiên"
+            },
+            {
+              "code": "33",
+              "name": "Bài 33: Quan hệ giữa ba cạnh của một tam giác"
+            },
+            {
+              "code": "34",
+              "name": "Bài 34: Sự đồng quy của ba đường trung tuyến, ba đường phân giác trong một tam giác"
+            },
+            {
+              "code": "35",
+              "name": "Bài 35: Sự đồng quy của ba đường trung trực, ba đường cao trong một tam giác"
+            }
+          ]
+        },
+        {
+          "code": "C10",
+          "name": "Chương 10: Một số hình khối trong thực tiễn",
+          "children": [
+            {
+              "code": "36",
+              "name": "Bài 36: Hình hộp chữ nhật và hình lập phương"
+            },
+            {
+              "code": "37",
+              "name": "Bài 37: Hình lăng trụ đứng tam giác và hình lăng trụ đứng tứ giác"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "8",
+      "name": "Lớp 8",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Đa thức",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Đơn thức"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Đa thức"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Phép cộng và phép trừ đa thức"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Phép nhân đa thức"
+            },
+            {
+              "code": "5",
+              "name": "Bài 5: Phép chia đa thức cho đơn thức"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Hằng đẳng thức đáng nhớ và ứng dụng",
+          "children": [
+            {
+              "code": "6",
+              "name": "Bài 6: Hiệu hai bình phương. Bình phương của một tổng hay một hiệu"
+            },
+            {
+              "code": "7",
+              "name": "Bài 7: Lập phương của một tổng. Lập phương của một hiệu"
+            },
+            {
+              "code": "8",
+              "name": "Bài 8: Tổng và hiệu hai lập phương"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Phân tích đa thức thành nhân tử"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Tứ giác",
+          "children": [
+            {
+              "code": "10",
+              "name": "Bài 10: Tứ giác"
+            },
+            {
+              "code": "11",
+              "name": "Bài 11: Hình thang cân"
+            },
+            {
+              "code": "12",
+              "name": "Bài 12: Hình bình hành"
+            },
+            {
+              "code": "13",
+              "name": "Bài 13: Hình chữ nhật"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Hình thoi và hình vuông"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Định lí Thalès",
+          "children": [
+            {
+              "code": "15",
+              "name": "Bài 15: Định lí Thalès trong tam giác"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Đường trung bình của tam giác"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Tính chất đường phân giác của tam giác"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Dữ liệu và biểu đồ",
+          "children": [
+            {
+              "code": "18",
+              "name": "Bài 18: Thu thập và phân loại dữ liệu"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Biểu diễn dữ liệu bằng bảng, biểu đồ"
+            },
+            {
+              "code": "20",
+              "name": "Bài 20: Phân tích số liệu thống kê dựa vào biểu đồ"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Phân thức đại số",
+          "children": [
+            {
+              "code": "21",
+              "name": "Bài 21: Phân thức đại số"
+            },
+            {
+              "code": "22",
+              "name": "Bài 22: Tính chất cơ bản của phân thức đại số"
+            },
+            {
+              "code": "23",
+              "name": "Bài 23: Phép cộng và phép trừ phân thức đại số"
+            },
+            {
+              "code": "24",
+              "name": "Bài 24: Phép nhân và phép chia phân thức đại số"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Phương trình bậc nhất và hàm số bậc nhất",
+          "children": [
+            {
+              "code": "25",
+              "name": "Bài 25: Phương trình bậc nhất một ẩn"
+            },
+            {
+              "code": "26",
+              "name": "Bài 26: Giải bài toán bằng cách lập phương trình"
+            },
+            {
+              "code": "27",
+              "name": "Bài 27: Khái niệm hàm số và đồ thị của hàm số"
+            },
+            {
+              "code": "28",
+              "name": "Bài 28: Hàm số bậc nhất và đồ thị của hàm số bậc nhất"
+            },
+            {
+              "code": "29",
+              "name": "Bài 29: Hệ số góc của đường thẳng"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Mở đầu về tính xác suất của biến cố",
+          "children": [
+            {
+              "code": "30",
+              "name": "Bài 30: Kết quả có thể và kết quả thuận lợi"
+            },
+            {
+              "code": "31",
+              "name": "Bài 31: Cách tính xác suất của biến cố bằng tỉ số"
+            },
+            {
+              "code": "32",
+              "name": "Bài 32: Mối liên hệ giữa xác suất thực nghiệm với xác suất và ứng dụng"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Tam giác đồng dạng",
+          "children": [
+            {
+              "code": "33",
+              "name": "Bài 33: Hai tam giác đồng dạng"
+            },
+            {
+              "code": "34",
+              "name": "Bài 34: Ba trường hợp đồng dạng của hai tam giác"
+            },
+            {
+              "code": "35",
+              "name": "Bài 35: Định lí Pythagore và ứng dụng"
+            },
+            {
+              "code": "36",
+              "name": "Bài 36: Các trường hợp đồng dạng của hai tam giác vuông"
+            },
+            {
+              "code": "37",
+              "name": "Bài 37: Hình đồng dạng"
+            }
+          ]
+        },
+        {
+          "code": "C10",
+          "name": "Chương 10: Một số hình khối trong thực tiễn",
+          "children": [
+            {
+              "code": "38",
+              "name": "Bài 38: Hình chóp tam giác đều"
+            },
+            {
+              "code": "39",
+              "name": "Bài 39: Hình chóp tứ giác đều"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "9",
+      "name": "Lớp 9",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Phương trình và hệ hai phương trình bậc nhất hai ẩn",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Khái niệm phương trình và hệ hai phương trình bậc nhất hai ẩn"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Giải hệ hai phương trình bậc nhất hai ẩn"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Giải bài toán bằng cách lập hệ phương trình"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Phương trình và bất phương trình bậc nhất một ẩn",
+          "children": [
+            {
+              "code": "4",
+              "name": "Bài 4: Phương trình quy về phương trình bậc nhất một ẩn"
+            },
+            {
+              "code": "5",
+              "name": "Bài 5: Bất đẳng thức và tính chất"
+            },
+            {
+              "code": "6",
+              "name": "Bài 6: Bất phương trình bậc nhất một ẩn"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Căn bậc hai và căn bậc ba",
+          "children": [
+            {
+              "code": "7",
+              "name": "Bài 7: Căn bậc hai và căn thức bậc hai"
+            },
+            {
+              "code": "8",
+              "name": "Bài 8: Khai căn bậc hai với phép nhân và phép chia"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Biến đổi đơn giản và rút gọn biểu thức chứa căn thức bậc hai"
+            },
+            {
+              "code": "10",
+              "name": "Bài 10: Căn bậc ba và căn thức bậc ba"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Hệ thức lượng trong tam giác vuông",
+          "children": [
+            {
+              "code": "11",
+              "name": "Bài 11: Tỉ số lượng giác của góc nhọn"
+            },
+            {
+              "code": "12",
+              "name": "Bài 12: Một số hệ thức giữa cạnh, góc trong tam giác vuông và ứng dụng"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Đường tròn",
+          "children": [
+            {
+              "code": "13",
+              "name": "Bài 13: Mở đầu về đường tròn"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Cung và dây của một đường tròn"
+            },
+            {
+              "code": "15",
+              "name": "Bài 15: Vị trí tương đối của đường thẳng và đường tròn"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Vị trí tương đối của hai đường tròn"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Chu vi và diện tích hình tròn. Diện tích hình quạt tròn"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Hàm số y = ax^2 (a ≠ 0). Phương trình bậc hai một ẩn",
+          "children": [
+            {
+              "code": "18",
+              "name": "Bài 18: Hàm số y = ax^2 (a ≠ 0)"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Phương trình bậc hai một ẩn"
+            },
+            {
+              "code": "20",
+              "name": "Bài 20: Định lí Viète và ứng dụng"
+            },
+            {
+              "code": "21",
+              "name": "Bài 21: Giải bài toán bằng cách lập phương trình"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Tần số và tần số tương đối",
+          "children": [
+            {
+              "code": "22",
+              "name": "Bài 22: Bảng tần số và biểu đồ tần số"
+            },
+            {
+              "code": "23",
+              "name": "Bài 23: Bảng tần số tương đối và biểu đồ tần số tương đối"
+            },
+            {
+              "code": "24",
+              "name": "Bài 24: Bảng tần số, tần số tương đối ghép nhóm và biểu đồ"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Xác suất của biến cố trong một số mô hình xác suất đơn giản",
+          "children": [
+            {
+              "code": "25",
+              "name": "Bài 25: Phép thử ngẫu nhiên và không gian mẫu"
+            },
+            {
+              "code": "26",
+              "name": "Bài 26: Xác suất của biến cố liên quan tới phép thử"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Đường tròn ngoại tiếp và đường tròn nội tiếp",
+          "children": [
+            {
+              "code": "27",
+              "name": "Bài 27: Góc nội tiếp"
+            },
+            {
+              "code": "28",
+              "name": "Bài 28: Đường tròn ngoại tiếp và đường tròn nội tiếp của một tam giác"
+            },
+            {
+              "code": "29",
+              "name": "Bài 29: Tứ giác nội tiếp"
+            },
+            {
+              "code": "30",
+              "name": "Bài 30: Đa giác đều"
+            }
+          ]
+        },
+        {
+          "code": "C10",
+          "name": "Chương 10: Một số hình khối trong thực tiễn",
+          "children": [
+            {
+              "code": "31",
+              "name": "Bài 31: Hình trụ và hình nón"
+            },
+            {
+              "code": "32",
+              "name": "Bài 32: Hình cầu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "10",
+      "name": "Lớp 10",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Mệnh đề và tập hợp",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Mệnh đề",
+              "children": [
+                {
+                  "code": "1",
+                  "name": "Dạng 1: Nhận biết mệnh đề, mệnh đề chứa biến"
+                },
+                {
+                  "code": "2",
+                  "name": "Dạng 2: Phủ định của mệnh đề"
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Tập hợp và các phép toán trên tập hợp"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Bất phương trình và hệ bất phương trình bậc nhất hai ẩn",
+          "children": [
+            {
+              "code": "3",
+              "name": "Bài 3: Bất phương trình bậc nhất hai ẩn"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Hệ bất phương trình bậc nhất hai ẩn"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Hệ thức lượng trong tam giác",
+          "children": [
+            {
+              "code": "5",
+              "name": "Bài 5: Giá trị lượng giác của một góc từ 0 độ đến 180 độ"
+            },
+            {
+              "code": "6",
+              "name": "Bài 6: Hệ thức lượng trong tam giác"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Vectơ",
+          "children": [
+            {
+              "code": "7",
+              "name": "Bài 7: Các khái niệm mở đầu"
+            },
+            {
+              "code": "8",
+              "name": "Bài 8: Tổng và hiệu của hai vectơ"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Tích của một vectơ với một số"
+            },
+            {
+              "code": "10",
+              "name": "Bài 10: Vectơ trong mặt phẳng toạ độ"
+            },
+            {
+              "code": "11",
+              "name": "Bài 11: Tích vô hướng của hai vectơ"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Các số đặc trưng đo xu thế trung tâm của mẫu số liệu không ghép nhóm",
+          "children": [
+            {
+              "code": "12",
+              "name": "Bài 12: Số gần đúng và sai số"
+            },
+            {
+              "code": "13",
+              "name": "Bài 13: Các số đặc trưng đo xu thế trung tâm"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Các số đặc trưng đo độ phân tán"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Hàm số, đồ thị và ứng dụng",
+          "children": [
+            {
+              "code": "15",
+              "name": "Bài 15: Hàm số"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Hàm số bậc hai"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Dấu của tam thức bậc hai"
+            },
+            {
+              "code": "18",
+              "name": "Bài 18: Phương trình quy về phương trình bậc hai"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Phương pháp toạ độ trong mặt phẳng",
+          "children": [
+            {
+              "code": "19",
+              "name": "Bài 19: Phương trình đường thẳng"
+            },
+            {
+              "code": "20",
+              "name": "Bài 20: Vị trí tương đối, góc và khoảng cách"
+            },
+            {
+              "code": "21",
+              "name": "Bài 21: Đường tròn trong mặt phẳng toạ độ"
+            },
+            {
+              "code": "22",
+              "name": "Bài 22: Ba đường conic"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Đại số tổ hợp",
+          "children": [
+            {
+              "code": "23",
+              "name": "Bài 23: Quy tắc đếm"
+            },
+            {
+              "code": "24",
+              "name": "Bài 24: Hoán vị, chỉnh hợp và tổ hợp"
+            },
+            {
+              "code": "25",
+              "name": "Bài 25: Nhị thức Newton"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Tính xác suất theo định nghĩa cổ điển",
+          "children": [
+            {
+              "code": "26",
+              "name": "Bài 26: Biến cố và định nghĩa cổ điển của xác suất"
+            },
+            {
+              "code": "27",
+              "name": "Bài 27: Thực hành tính xác suất theo định nghĩa cổ điển"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "11",
+      "name": "Lớp 11",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Hàm số lượng giác và phương trình lượng giác",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Giá trị lượng giác của góc lượng giác",
+              "children": [
+                {
+                  "code": "1",
+                  "name": "Dạng 1: Đổi số đo góc lượng giác"
+                },
+                {
+                  "code": "2",
+                  "name": "Dạng 2: Tính giá trị lượng giác của một góc"
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Công thức lượng giác"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Hàm số lượng giác"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Phương trình lượng giác cơ bản"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Dãy số. Cấp số cộng và cấp số nhân",
+          "children": [
+            {
+              "code": "5",
+              "name": "Bài 5: Dãy số"
+            },
+            {
+              "code": "6",
+              "name": "Bài 6: Cấp số cộng"
+            },
+            {
+              "code": "7",
+              "name": "Bài 7: Cấp số nhân"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Các số đặc trưng đo xu thế trung tâm của mẫu số liệu ghép nhóm",
+          "children": [
+            {
+              "code": "8",
+              "name": "Bài 8: Mẫu số liệu ghép nhóm"
+            },
+            {
+              "code": "9",
+              "name": "Bài 9: Các số đặc trưng đo xu thế trung tâm"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Quan hệ song song trong không gian",
+          "children": [
+            {
+              "code": "10",
+              "name": "Bài 10: Đường thẳng và mặt phẳng trong không gian"
+            },
+            {
+              "code": "11",
+              "name": "Bài 11: Hai đường thẳng song song"
+            },
+            {
+              "code": "12",
+              "name": "Bài 12: Đường thẳng và mặt phẳng song song"
+            },
+            {
+              "code": "13",
+              "name": "Bài 13: Hai mặt phẳng song song"
+            },
+            {
+              "code": "14",
+              "name": "Bài 14: Phép chiếu song song"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Giới hạn. Hàm số liên tục",
+          "children": [
+            {
+              "code": "15",
+              "name": "Bài 15: Giới hạn của dãy số"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Giới hạn của hàm số"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Hàm số liên tục"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Hàm số mũ và hàm số lôgarit",
+          "children": [
+            {
+              "code": "18",
+              "name": "Bài 18: Luỹ thừa với số mũ thực"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Lôgarit"
+            },
+            {
+              "code": "20",
+              "name": "Bài 20: Hàm số mũ và hàm số lôgarit"
+            },
+            {
+              "code": "21",
+              "name": "Bài 21: Phương trình, bất phương trình mũ và lôgarit"
+            }
+          ]
+        },
+        {
+          "code": "C7",
+          "name": "Chương 7: Quan hệ vuông góc trong không gian",
+          "children": [
+            {
+              "code": "22",
+              "name": "Bài 22: Hai đường thẳng vuông góc"
+            },
+            {
+              "code": "23",
+              "name": "Bài 23: Đường thẳng vuông góc với mặt phẳng"
+            },
+            {
+              "code": "24",
+              "name": "Bài 24: Phép chiếu vuông góc. Góc giữa đường thẳng và mặt phẳng"
+            },
+            {
+              "code": "25",
+              "name": "Bài 25: Hai mặt phẳng vuông góc"
+            },
+            {
+              "code": "26",
+              "name": "Bài 26: Khoảng cách"
+            },
+            {
+              "code": "27",
+              "name": "Bài 27: Thể tích"
+            }
+          ]
+        },
+        {
+          "code": "C8",
+          "name": "Chương 8: Các quy tắc tính xác suất",
+          "children": [
+            {
+              "code": "28",
+              "name": "Bài 28: Biến cố hợp, biến cố giao, biến cố độc lập"
+            },
+            {
+              "code": "29",
+              "name": "Bài 29: Công thức cộng xác suất"
+            },
+            {
+              "code": "30",
+              "name": "Bài 30: Công thức nhân xác suất cho hai biến cố độc lập"
+            }
+          ]
+        },
+        {
+          "code": "C9",
+          "name": "Chương 9: Đạo hàm",
+          "children": [
+            {
+              "code": "31",
+              "name": "Bài 31: Định nghĩa và ý nghĩa của đạo hàm"
+            },
+            {
+              "code": "32",
+              "name": "Bài 32: Các quy tắc tính đạo hàm"
+            },
+            {
+              "code": "33",
+              "name": "Bài 33: Đạo hàm cấp hai"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "12",
+      "name": "Lớp 12",
+      "children": [
+        {
+          "code": "C1",
+          "name": "Chương 1: Ứng dụng đạo hàm để khảo sát và vẽ đồ thị của hàm số",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Tính đơn điệu và cực trị của hàm số",
+              "children": [
+                {
+                  "code": "1",
+                  "name": "Dạng 1: Xét tính đơn điệu của hàm số"
+                },
+                {
+                  "code": "2",
+                  "name": "Dạng 2: Tìm cực trị của hàm số"
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Giá trị lớn nhất và giá trị nhỏ nhất của hàm số"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Đường tiệm cận của đồ thị hàm số"
+            },
+            {
+              "code": "4",
+              "name": "Bài 4: Khảo sát sự biến thiên và vẽ đồ thị của hàm số"
+            },
+            {
+              "code": "5",
+              "name": "Bài 5: Ứng dụng đạo hàm để giải quyết một số vấn đề liên quan đến thực tiễn"
+            }
+          ]
+        },
+        {
+          "code": "C2",
+          "name": "Chương 2: Vectơ và hệ toạ độ trong không gian",
+          "children": [
+            {
+              "code": "6",
+              "name": "Bài 6: Vectơ trong không gian"
+            },
+            {
+              "code": "7",
+              "name": "Bài 7: Hệ toạ độ trong không gian"
+            },
+            {
+              "code": "8",
+              "name": "Bài 8: Biểu thức toạ độ của các phép toán vectơ"
+            }
+          ]
+        },
+        {
+          "code": "C3",
+          "name": "Chương 3: Các số đặc trưng đo mức độ phân tán của mẫu số liệu ghép nhóm",
+          "children": [
+            {
+              "code": "9",
+              "name": "Bài 9: Khoảng biến thiên và khoảng tứ phân vị"
+            },
+            {
+              "code": "10",
+              "name": "Bài 10: Phương sai và độ lệch chuẩn"
+            }
+          ]
+        },
+        {
+          "code": "C4",
+          "name": "Chương 4: Nguyên hàm và tích phân",
+          "children": [
+            {
+              "code": "11",
+              "name": "Bài 11: Nguyên hàm"
+            },
+            {
+              "code": "12",
+              "name": "Bài 12: Tích phân"
+            },
+            {
+              "code": "13",
+              "name": "Bài 13: Ứng dụng hình học của tích phân"
+            }
+          ]
+        },
+        {
+          "code": "C5",
+          "name": "Chương 5: Phương trình mặt phẳng, đường thẳng, mặt cầu trong không gian",
+          "children": [
+            {
+              "code": "14",
+              "name": "Bài 14: Phương trình mặt phẳng"
+            },
+            {
+              "code": "15",
+              "name": "Bài 15: Phương trình đường thẳng trong không gian"
+            },
+            {
+              "code": "16",
+              "name": "Bài 16: Công thức tính góc trong không gian"
+            },
+            {
+              "code": "17",
+              "name": "Bài 17: Phương trình mặt cầu"
+            }
+          ]
+        },
+        {
+          "code": "C6",
+          "name": "Chương 6: Xác suất có điều kiện",
+          "children": [
+            {
+              "code": "18",
+              "name": "Bài 18: Xác suất có điều kiện"
+            },
+            {
+              "code": "19",
+              "name": "Bài 19: Công thức xác suất toàn phần và công thức Bayes"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "code": "N",
+      "name": "Nhận biết",
+      "ord": 1
+    },
+    {
+      "code": "H",
+      "name": "Thông hiểu",
+      "ord": 2
+    },
+    {
+      "code": "V",
+      "name": "Vận dụng",
+      "ord": 3
+    },
+    {
+      "code": "C",
+      "name": "Vận dụng cao",
+      "ord": 4
+    }
+  ]
+}

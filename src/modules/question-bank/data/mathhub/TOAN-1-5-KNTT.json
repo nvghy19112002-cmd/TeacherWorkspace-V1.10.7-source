@@ -1,0 +1,418 @@
+{
+  "format": {
+    "separator": "-",
+    "open": "[",
+    "close": "]",
+    "levelOpen": "(",
+    "levelClose": ")",
+    "readSeparators": "-_*.·/|,;:+ ()",
+    "readWrappers": [
+      [
+        "[",
+        "]"
+      ],
+      [
+        "(",
+        ")"
+      ],
+      [
+        "<",
+        ">"
+      ],
+      [
+        "{",
+        "}"
+      ]
+    ]
+  },
+  "nodes": [
+    {
+      "code": "1",
+      "name": "Lớp 1",
+      "children": [
+        {
+          "code": "CD1",
+          "name": "Chủ đề 1: Làm quen với một số hình",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Vị trí",
+              "children": [
+                {
+                  "code": "1",
+                  "name": "Dạng 1: Nhận biết trên - dưới, phải - trái"
+                },
+                {
+                  "code": "2",
+                  "name": "Dạng 2: Nhận biết trước - sau, ở giữa"
+                }
+              ]
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Các số 1, 2, 3"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Nhiều hơn, ít hơn, bằng nhau"
+            }
+          ]
+        },
+        {
+          "code": "CD2",
+          "name": "Chủ đề 2: Các số đến 10"
+        },
+        {
+          "code": "CD3",
+          "name": "Chủ đề 3: Phép cộng, phép trừ trong phạm vi 10"
+        },
+        {
+          "code": "CD4",
+          "name": "Chủ đề 4: Làm quen với một số hình khối"
+        },
+        {
+          "code": "CD5",
+          "name": "Chủ đề 5: Ôn tập học kì 1"
+        },
+        {
+          "code": "CD6",
+          "name": "Chủ đề 6: Các số đến 100"
+        },
+        {
+          "code": "CD7",
+          "name": "Chủ đề 7: Độ dài và đo độ dài"
+        },
+        {
+          "code": "CD8",
+          "name": "Chủ đề 8: Phép cộng, phép trừ (không nhớ) trong phạm vi 100"
+        },
+        {
+          "code": "CD9",
+          "name": "Chủ đề 9: Thời gian, giờ và lịch"
+        },
+        {
+          "code": "CD10",
+          "name": "Chủ đề 10: Ôn tập cuối năm"
+        }
+      ]
+    },
+    {
+      "code": "2",
+      "name": "Lớp 2",
+      "children": [
+        {
+          "code": "CD1",
+          "name": "Chủ đề 1: Ôn tập và bổ sung",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Ôn tập các số đến 100"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Tia số. Số liền trước, số liền sau"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Các thành phần của phép cộng, phép trừ"
+            }
+          ]
+        },
+        {
+          "code": "CD2",
+          "name": "Chủ đề 2: Phép cộng, phép trừ qua 10 trong phạm vi 20"
+        },
+        {
+          "code": "CD3",
+          "name": "Chủ đề 3: Làm quen với khối lượng, dung tích"
+        },
+        {
+          "code": "CD4",
+          "name": "Chủ đề 4: Phép cộng, phép trừ (có nhớ) trong phạm vi 100"
+        },
+        {
+          "code": "CD5",
+          "name": "Chủ đề 5: Làm quen với hình phẳng"
+        },
+        {
+          "code": "CD6",
+          "name": "Chủ đề 6: Ngày - tháng, giờ - phút"
+        },
+        {
+          "code": "CD7",
+          "name": "Chủ đề 7: Ôn tập học kì 1"
+        },
+        {
+          "code": "CD8",
+          "name": "Chủ đề 8: Phép nhân, phép chia"
+        },
+        {
+          "code": "CD9",
+          "name": "Chủ đề 9: Làm quen với hình khối"
+        },
+        {
+          "code": "CD10",
+          "name": "Chủ đề 10: Các số trong phạm vi 1000"
+        },
+        {
+          "code": "CD11",
+          "name": "Chủ đề 11: Độ dài và đơn vị đo độ dài. Tiền Việt Nam"
+        },
+        {
+          "code": "CD12",
+          "name": "Chủ đề 12: Phép cộng, phép trừ trong phạm vi 1000"
+        },
+        {
+          "code": "CD13",
+          "name": "Chủ đề 13: Làm quen với yếu tố thống kê, xác suất"
+        },
+        {
+          "code": "CD14",
+          "name": "Chủ đề 14: Ôn tập cuối năm"
+        }
+      ]
+    },
+    {
+      "code": "3",
+      "name": "Lớp 3",
+      "children": [
+        {
+          "code": "CD1",
+          "name": "Chủ đề 1: Ôn tập và bổ sung",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Ôn tập các số đến 1000"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Ôn tập phép cộng, phép trừ trong phạm vi 1000"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Tìm thành phần trong phép cộng, phép trừ"
+            }
+          ]
+        },
+        {
+          "code": "CD2",
+          "name": "Chủ đề 2: Bảng nhân, bảng chia"
+        },
+        {
+          "code": "CD3",
+          "name": "Chủ đề 3: Làm quen với hình phẳng, hình khối"
+        },
+        {
+          "code": "CD4",
+          "name": "Chủ đề 4: Phép nhân, phép chia trong phạm vi 100"
+        },
+        {
+          "code": "CD5",
+          "name": "Chủ đề 5: Một số đơn vị đo đại lượng"
+        },
+        {
+          "code": "CD6",
+          "name": "Chủ đề 6: Phép cộng, phép trừ trong phạm vi 10 000"
+        },
+        {
+          "code": "CD7",
+          "name": "Chủ đề 7: Ôn tập học kì 1"
+        },
+        {
+          "code": "CD8",
+          "name": "Chủ đề 8: Các số đến 10 000"
+        },
+        {
+          "code": "CD9",
+          "name": "Chủ đề 9: Phép nhân, phép chia trong phạm vi 10 000"
+        },
+        {
+          "code": "CD10",
+          "name": "Chủ đề 10: Làm quen với phân số. Hình học và đo lường"
+        },
+        {
+          "code": "CD11",
+          "name": "Chủ đề 11: Các số đến 100 000"
+        },
+        {
+          "code": "CD12",
+          "name": "Chủ đề 12: Phép cộng, phép trừ trong phạm vi 100 000"
+        },
+        {
+          "code": "CD13",
+          "name": "Chủ đề 13: Phép nhân, phép chia trong phạm vi 100 000"
+        },
+        {
+          "code": "CD14",
+          "name": "Chủ đề 14: Yếu tố thống kê, xác suất"
+        },
+        {
+          "code": "CD15",
+          "name": "Chủ đề 15: Ôn tập cuối năm"
+        }
+      ]
+    },
+    {
+      "code": "4",
+      "name": "Lớp 4",
+      "children": [
+        {
+          "code": "CD1",
+          "name": "Chủ đề 1: Ôn tập và bổ sung",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Ôn tập các số đến 100 000"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Ôn tập phép cộng, phép trừ"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Ôn tập phép nhân, phép chia"
+            }
+          ]
+        },
+        {
+          "code": "CD2",
+          "name": "Chủ đề 2: Góc và đơn vị đo góc"
+        },
+        {
+          "code": "CD3",
+          "name": "Chủ đề 3: Số có nhiều chữ số"
+        },
+        {
+          "code": "CD4",
+          "name": "Chủ đề 4: Một số đơn vị đo đại lượng"
+        },
+        {
+          "code": "CD5",
+          "name": "Chủ đề 5: Phép cộng và phép trừ"
+        },
+        {
+          "code": "CD6",
+          "name": "Chủ đề 6: Đường thẳng vuông góc. Đường thẳng song song"
+        },
+        {
+          "code": "CD7",
+          "name": "Chủ đề 7: Ôn tập học kì 1"
+        },
+        {
+          "code": "CD8",
+          "name": "Chủ đề 8: Phép nhân và phép chia"
+        },
+        {
+          "code": "CD9",
+          "name": "Chủ đề 9: Làm quen với yếu tố thống kê, xác suất"
+        },
+        {
+          "code": "CD10",
+          "name": "Chủ đề 10: Phân số"
+        },
+        {
+          "code": "CD11",
+          "name": "Chủ đề 11: Các phép tính với phân số"
+        },
+        {
+          "code": "CD12",
+          "name": "Chủ đề 12: Ôn tập cuối năm"
+        }
+      ]
+    },
+    {
+      "code": "5",
+      "name": "Lớp 5",
+      "children": [
+        {
+          "code": "CD1",
+          "name": "Chủ đề 1: Ôn tập và bổ sung",
+          "children": [
+            {
+              "code": "1",
+              "name": "Bài 1: Ôn tập số tự nhiên"
+            },
+            {
+              "code": "2",
+              "name": "Bài 2: Ôn tập các phép tính với số tự nhiên"
+            },
+            {
+              "code": "3",
+              "name": "Bài 3: Ôn tập phân số"
+            }
+          ]
+        },
+        {
+          "code": "CD2",
+          "name": "Chủ đề 2: Số thập phân"
+        },
+        {
+          "code": "CD3",
+          "name": "Chủ đề 3: Một số đơn vị đo diện tích"
+        },
+        {
+          "code": "CD4",
+          "name": "Chủ đề 4: Phép cộng, phép trừ số thập phân"
+        },
+        {
+          "code": "CD5",
+          "name": "Chủ đề 5: Phép nhân, phép chia số thập phân"
+        },
+        {
+          "code": "CD6",
+          "name": "Chủ đề 6: Hình tam giác, hình thang"
+        },
+        {
+          "code": "CD7",
+          "name": "Chủ đề 7: Ôn tập học kì 1"
+        },
+        {
+          "code": "CD8",
+          "name": "Chủ đề 8: Thể tích, một số đơn vị đo thể tích"
+        },
+        {
+          "code": "CD9",
+          "name": "Chủ đề 9: Diện tích và thể tích của một số hình khối"
+        },
+        {
+          "code": "CD10",
+          "name": "Chủ đề 10: Số đo thời gian. Vận tốc. Quãng đường. Thời gian"
+        },
+        {
+          "code": "CD11",
+          "name": "Chủ đề 11: Tỉ số phần trăm"
+        },
+        {
+          "code": "CD12",
+          "name": "Chủ đề 12: Thống kê và xác suất"
+        },
+        {
+          "code": "CD13",
+          "name": "Chủ đề 13: Ôn tập cuối năm"
+        }
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "code": "N",
+      "name": "Nhận biết",
+      "ord": 1
+    },
+    {
+      "code": "H",
+      "name": "Thông hiểu",
+      "ord": 2
+    },
+    {
+      "code": "V",
+      "name": "Vận dụng",
+      "ord": 3
+    },
+    {
+      "code": "C",
+      "name": "Vận dụng cao",
+      "ord": 4
+    }
+  ]
+}
