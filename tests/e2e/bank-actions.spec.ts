@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('compact bank actions and one confirmation scan and approve a batch', async ({ page }) => {
+  // Cold Windows runners must load SQLite WASM and lazy screens before this long UI flow.
+  test.setTimeout(90000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.addInitScript(() =>
@@ -52,8 +54,14 @@ test('compact bank actions and one confirmation scan and approve a batch', async
     });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true }).click();
-  await expect(page.locator('.qb-studio-header')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.locator('main .page-loading')).toHaveCount(0, { timeout: 30000 });
+  await page
+    .getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true })
+    .click({ timeout: 30000 });
+  await expect(page.locator('.qb-studio-header')).toBeVisible({ timeout: 30000 });
   expect((await page.locator('.qb-studio-header').boundingBox())!.height).toBeLessThanOrEqual(70);
   const setup = await page.evaluate(async () => {
     const bankPath = '/src/modules/question-bank/store.ts',
