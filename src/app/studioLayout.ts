@@ -14,6 +14,7 @@ export const studioLayoutSchema = z.object({
       'documents',
       'question-bank',
       'classification',
+      'exam-builder',
       'ai-tools',
       'settings',
     ])

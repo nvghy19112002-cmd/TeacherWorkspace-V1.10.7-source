@@ -61,6 +61,7 @@ export function createExam(
     examDate: null,
     status: 'draft',
     seed,
+    matrixJson: '',
     createdAt: now,
     updatedAt: now,
   };
@@ -92,7 +93,7 @@ export function examToLatex(snapshot: BankSnapshot, exam: Exam): string {
       } catch {
         question = questions.get(item.questionId);
       }
-      return `% Câu ${index + 1} • ${question?.displayId || 'Chưa có ID'}\n${question?.rawSource ?? '% Không đọc được snapshot câu hỏi'}`;
+      return `% Câu ${index + 1} • ${question?.displayId || 'Chưa có ID'} • ${(item.points / 100).toFixed(2)} điểm\n${question?.rawSource ?? '% Không đọc được snapshot câu hỏi'}`;
     })
     .join('\n\n');
   const answers = items

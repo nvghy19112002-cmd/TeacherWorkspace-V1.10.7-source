@@ -29,7 +29,7 @@ it('migrates a real v2 database without losing any of 200 sources, preserving a 
     expect(version).toBe(2);
     backup = bytes;
   });
-  expect(db.exec('PRAGMA user_version')[0].values[0][0]).toBe(3);
+  expect(db.exec('PRAGMA user_version')[0].values[0][0]).toBe(4);
   const after = decodeBank(readBankState(db).tables);
   expect(after.questions).toHaveLength(200);
   const byId = new Map(after.questions.map((q) => [q.id, q.rawSource]));

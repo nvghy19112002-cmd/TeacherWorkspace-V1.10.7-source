@@ -108,6 +108,7 @@ export const examSchema = z.object({
   examDate: z.string().nullable(),
   status: z.enum(['draft', 'finalized', 'archived']),
   seed: z.string().max(100),
+  matrixJson: z.string().max(100000).default(''),
   createdAt: timestamp,
   updatedAt: timestamp,
 });

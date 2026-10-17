@@ -3,6 +3,7 @@ import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import migration from './migrations/001_initial.sql?raw';
 import bankMigration from './migrations/002_question_bank.sql?raw';
 import searchMigration from './migrations/003_question_search.sql?raw';
+import examMigration from './migrations/004_exam_matrix.sql?raw';
 import { searchBankSqlite } from '../modules/question-bank/database/search';
 import {
   TABLES,
@@ -56,11 +57,11 @@ export function initializeSqlite(
   const db = new SQL.Database(bytes);
   db.run('PRAGMA foreign_keys=ON');
   const version = Number(db.exec('PRAGMA user_version')[0].values[0][0]);
-  if (version > 3) {
+  if (version > 4) {
     db.close();
     throw new Error('Database được tạo bởi phiên bản mới hơn. Hãy cập nhật ứng dụng.');
   }
-  if (version < 3) onUpgrade?.(version, db.export());
+  if (version < 4) onUpgrade?.(version, db.export());
   if (version < 1) {
     db.run('BEGIN IMMEDIATE');
     try {
@@ -90,6 +91,18 @@ export function initializeSqlite(
     try {
       db.run(searchMigration);
       db.run('PRAGMA user_version=3');
+      db.run('COMMIT');
+    } catch (error) {
+      db.run('ROLLBACK');
+      db.close();
+      throw error;
+    }
+  }
+  if (version < 4) {
+    db.run('BEGIN IMMEDIATE');
+    try {
+      db.run(examMigration);
+      db.run('PRAGMA user_version=4');
       db.run('COMMIT');
     } catch (error) {
       db.run('ROLLBACK');

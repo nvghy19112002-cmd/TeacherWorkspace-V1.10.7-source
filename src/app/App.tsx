@@ -35,6 +35,7 @@ const QuestionBankPage = lazy(async () => {
   return screen;
 });
 const ClassificationPage = lazy(() => import('../modules/question-bank/ClassificationWorkspace'));
+const ExamBuilderPage = lazy(() => import('../modules/question-bank/ExamBuilderPage'));
 const AiToolsPage = lazy(() => import('../modules/ai-tools/AiToolsPage'));
 const ExportDialog = lazy(() =>
   import('../modules/schedule/components/ExportDialog').then((m) => ({ default: m.ExportDialog })),
@@ -49,6 +50,7 @@ const SCREENS: Record<string, ComponentType> = {
   'question-bank': QuestionBankPage,
   'ai-tools': AiToolsPage,
   classification: ClassificationPage,
+  'exam-builder': ExamBuilderPage,
 };
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
   state: { error: string | null } = { error: null };

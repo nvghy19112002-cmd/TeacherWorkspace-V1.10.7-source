@@ -50,3 +50,5 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
 report = {'engine': engine, 'total': len(results), 'successCount': sum(r['success'] for r in results), 'failures': [r['index'] for r in results if not r['success']], 'results': results}
 (output / 'corpus-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
 print(json.dumps({key: report[key] for key in ['total', 'successCount', 'failures']}, ensure_ascii=False))
+
+raise SystemExit(1 if report['failures'] else 0)

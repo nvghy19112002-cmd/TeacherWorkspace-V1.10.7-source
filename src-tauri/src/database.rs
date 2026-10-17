@@ -20,13 +20,14 @@ const BANK_TABLES: &[(&str, &[&str])] = &[
     ("questions", &["id", "display_id", "classification_code", "sequence_number", "raw_source", "normalized_source", "content_hash", "question_type", "answer", "solution", "level", "grade_node_id", "domain_node_id", "chapter_node_id", "lesson_node_id", "form_node_id", "primary_outcome_id", "secondary_outcome_ids", "tags", "source", "status", "confidence", "reasoning", "warnings", "has_image", "usage_count", "id_locked", "created_at", "updated_at", "deleted_at"]),
     ("question_revisions", &["id", "question_id", "snapshot", "reason", "created_at"]),
     ("classification_runs", &["id", "question_id", "provider", "model", "result_json", "accepted", "created_at"]),
-    ("exams", &["id", "title", "grade_node_id", "duration_minutes", "exam_date", "status", "seed", "created_at", "updated_at"]),
+    ("exams", &["id", "title", "grade_node_id", "duration_minutes", "exam_date", "status", "seed", "created_at", "updated_at", "matrix_json"]),
     ("exam_items", &["id", "exam_id", "section_id", "question_id", "question_snapshot", "sort_order", "points", "locked"]),
 ];
 const MIGRATIONS: &[(i64, &str)] = &[
     (1, include_str!("../../src/database/migrations/001_initial.sql")),
     (2, include_str!("../../src/database/migrations/002_question_bank.sql")),
     (3, include_str!("../../src/database/migrations/003_question_search.sql")),
+    (4, include_str!("../../src/database/migrations/004_exam_matrix.sql")),
 ];
 
 pub fn open(path: &Path) -> Result<Connection, String> {
@@ -256,7 +257,7 @@ mod tests {
             assert_eq!(restored.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0)).unwrap(), 2);
             assert_eq!(restored.query_row("SELECT raw_source FROM questions WHERE id='q'", [], |r| r.get::<_, String>(0)).unwrap(), "Original source");
         }
-        assert_eq!(upgraded.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0)).unwrap(), 3);
+        assert_eq!(upgraded.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0)).unwrap(), 4);
         drop(upgraded); std::fs::remove_dir_all(dir).unwrap();
     }
     #[test]
