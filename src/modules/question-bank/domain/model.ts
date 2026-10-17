@@ -125,9 +125,38 @@ export const examItemSchema = z.object({
 });
 export type ExamItem = z.infer<typeof examItemSchema>;
 
+export const bankAssetSchema = z.object({
+  id,
+  questionId: id,
+  name: z.string().max(500),
+  relativePath: z.string().max(4096),
+  mimeType: z.string().max(100),
+  checksum: z.string().max(200),
+  missing: z.boolean(),
+  createdAt: timestamp,
+});
+export const bankTagSchema = z.object({
+  id,
+  name: z.string().min(1).max(200),
+  color: z.string().max(100),
+  createdAt: timestamp,
+});
+export const importJobSchema = z.object({
+  id,
+  sourceName: z.string().max(1000),
+  status: z.enum(['preview', 'committed', 'failed', 'cancelled']),
+  totalCount: z.number().int().nonnegative(),
+  importedCount: z.number().int().nonnegative(),
+  errorJson: z.string().max(300000),
+  createdAt: timestamp,
+  updatedAt: timestamp,
+});
 export const bankSnapshotSchema = z
   .object({
     schemaVersion: z.literal(1),
+    assets: z.array(bankAssetSchema).max(300000).default([]),
+    tagDefinitions: z.array(bankTagSchema).max(30000).default([]),
+    importJobs: z.array(importJobSchema).max(30000).default([]),
     curriculumNodes: z.array(curriculumNodeSchema).max(10000),
     learningOutcomes: z.array(learningOutcomeSchema).max(30000),
     questions: z.array(questionSchema).max(100000),
@@ -141,6 +170,13 @@ export const bankSnapshotSchema = z
       if (new Set(rows.map((row) => row.id)).size !== rows.length)
         ctx.addIssue({ code: 'custom', message: `${label} có ID bị trùng.` });
     };
+    unique(value.assets, 'Tài nguyên');
+    unique(value.tagDefinitions, 'Nhãn');
+    unique(value.importJobs, 'Lượt nhập');
+    if (new Set(value.tagDefinitions.map((t) => t.name)).size !== value.tagDefinitions.length)
+      ctx.addIssue({ code: 'custom', message: 'Tên nhãn bị trùng.' });
+    if (value.importJobs.some((job) => job.importedCount > job.totalCount))
+      ctx.addIssue({ code: 'custom', message: 'Số câu nhập vượt tổng số câu.' });
     unique(value.curriculumNodes, 'Cây chương trình');
     unique(value.learningOutcomes, 'Yêu cầu cần đạt');
     unique(value.questions, 'Câu hỏi');
@@ -152,6 +188,8 @@ export const bankSnapshotSchema = z
     const outcomes = new Set(value.learningOutcomes.map((row) => row.id));
     const questions = new Set(value.questions.map((row) => row.id));
     const exams = new Set(value.exams.map((row) => row.id));
+    if (value.assets.some((a) => !questions.has(a.questionId)))
+      ctx.addIssue({ code: 'custom', message: 'Tài nguyên trỏ đến câu không tồn tại.' });
     if (value.curriculumNodes.some((row) => row.parentId && !nodes.has(row.parentId)))
       ctx.addIssue({ code: 'custom', message: 'Cây chương trình có nút cha không tồn tại.' });
     if (value.learningOutcomes.some((row) => !nodes.has(row.nodeId)))
@@ -168,6 +206,9 @@ export type BankSnapshot = z.infer<typeof bankSnapshotSchema>;
 
 export const emptyBankSnapshot = (): BankSnapshot => ({
   schemaVersion: 1,
+  assets: [],
+  tagDefinitions: [],
+  importJobs: [],
   curriculumNodes: [],
   learningOutcomes: [],
   questions: [],

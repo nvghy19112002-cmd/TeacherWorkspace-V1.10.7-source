@@ -25,7 +25,7 @@ import type { Settings, Snapshot } from '../schedule/domain/model';
 import { ProviderSettings } from '../ai-tools/components/ProviderSettings';
 import { readAiState } from '../ai-tools/services/state';
 import { useQuestionBank } from '../question-bank/store';
-import { bankSnapshotSchema } from '../question-bank/domain/model';
+import { parseBankBackup, restoreBankSafely } from '../question-bank/domain/backup';
 import { TexPreviewSettingsPanel } from './TexPreviewSettingsPanel';
 export default function SettingsPage() {
   const data = useWorkspace((s) => s.data);
@@ -68,7 +68,7 @@ export default function SettingsPage() {
     },
   ];
   const [fileBusy, setFileBusy] = useState(false);
-  const bank = useQuestionBank((s) => s.data);
+  const bankData = useQuestionBank((s) => s.data);
   const bankCommit = useQuestionBank((s) => s.commit);
   const bankInitialize = useQuestionBank((s) => s.initialize);
   const aiModel = readAiState(data.settings.moduleState?.aiTools).model;
@@ -97,17 +97,30 @@ export default function SettingsPage() {
     try {
       const text = await openBackupFile();
       if (!text) return;
-      const parsed = JSON.parse(text) as { type?: string; data?: unknown };
-      if (parsed.type !== 'teacher-workspace-question-bank')
-        throw new Error('Đây không phải backup Ngân hàng câu hỏi.');
-      const incomingBank = bankSnapshotSchema.parse(parsed.data);
+      const incomingBank = parseBankBackup(text);
+      await bankInitialize();
+      const current = useQuestionBank.getState().data;
       if (
         !window.confirm(
-          `Thay thế ngân hàng hiện tại (${bank.questions.length} câu) bằng backup (${incomingBank.questions.length} câu)?`,
+          `Thay thế ngân hàng hiện tại (${current.questions.length} câu) bằng backup (${incomingBank.questions.length} câu)? Ứng dụng yêu cầu lưu bản sao hiện tại trước.`,
         )
       )
         return;
-      await bankCommit(() => incomingBank);
+      const restored = await restoreBankSafely(
+        current,
+        incomingBank,
+        (text) =>
+          saveFile(
+            `TeacherWorkspace-bank-before-restore-${Date.now()}.json`,
+            new TextEncoder().encode(text),
+            'application/json',
+          ),
+        (snapshot) => bankCommit(() => snapshot),
+      );
+      if (!restored) {
+        push('Đã dừng khôi phục vì bản sao ngân hàng hiện tại chưa được lưu.', 'info');
+        return;
+      }
       push('Đã khôi phục Ngân hàng câu hỏi.');
     } catch (e) {
       push(errorText(e), 'error');
@@ -179,7 +192,11 @@ export default function SettingsPage() {
               key={item.id}
               className={section === item.id ? 'active' : ''}
               aria-current={section === item.id ? 'page' : undefined}
-              onClick={() => setSection(item.id)}
+              onClick={() => {
+                setSection(item.id);
+                if (item.id === 'data')
+                  void bankInitialize().catch((e) => push(errorText(e), 'error'));
+              }}
             >
               <item.icon size={20} />
               <span>
@@ -300,6 +317,33 @@ export default function SettingsPage() {
             </div>
           </section>
           <div hidden={section !== 'data'} className="settings-stack">
+            <section className="panel">
+              <h2>Ngân hàng: nguồn nhập và tài nguyên</h2>
+              <p>
+                {bankData.questions.length} câu · {bankData.tagDefinitions.length} nhãn ·{' '}
+                {bankData.assets.length} tài nguyên tham chiếu,{' '}
+                {bankData.assets.filter((a) => a.missing).length} chưa xác minh.
+              </p>
+              <details>
+                <summary>Lịch sử nhập ({bankData.importJobs.length})</summary>
+                <ul>
+                  {bankData.importJobs
+                    .slice(-30)
+                    .reverse()
+                    .map((job) => (
+                      <li key={job.id}>
+                        {new Date(job.createdAt).toLocaleString('vi-VN')} ·{' '}
+                        {job.sourceName || 'Không ghi nguồn'} · {job.importedCount}/{job.totalCount}{' '}
+                        câu · {job.status}
+                      </li>
+                    ))}
+                </ul>
+              </details>
+              <p>
+                Backup ngân hàng chứa metadata tài nguyên. Ảnh/PDF ngoài vẫn cần được sao lưu trong
+                dự án TeX; không coi metadata là bản sao file.
+              </p>
+            </section>
             <section className="panel">
               <h2>
                 <ShieldCheck size={20} />

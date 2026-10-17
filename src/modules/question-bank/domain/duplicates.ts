@@ -1,5 +1,5 @@
 import type { Question } from './model';
-import { similarity } from './normalize';
+import { similarity, exactQuestionSource } from './normalize';
 
 export interface DuplicateCandidate {
   left: Question;
@@ -8,14 +8,18 @@ export interface DuplicateCandidate {
   method: 'hash' | 'similarity';
 }
 
-export function findDuplicateCandidates(questions: Question[], threshold = 82): DuplicateCandidate[] {
+export function findDuplicateCandidates(
+  questions: Question[],
+  threshold = 82,
+): DuplicateCandidate[] {
   const active = questions.filter((question) => !question.deletedAt);
   const output: DuplicateCandidate[] = [];
   const hashes = new Map<string, Question[]>();
   for (const question of active) {
     const group = hashes.get(question.contentHash) ?? [];
     for (const previous of group)
-      output.push({ left: previous, right: question, score: 100, method: 'hash' });
+      if (exactQuestionSource(previous.rawSource) === exactQuestionSource(question.rawSource))
+        output.push({ left: previous, right: question, score: 100, method: 'hash' });
     group.push(question);
     hashes.set(question.contentHash, group);
   }

@@ -1,7 +1,9 @@
 import { isTauri, invoke } from '@tauri-apps/api/core';
+import type { BankSearchRequest, BankSearchResult } from '../modules/question-bank/database/search';
 import type { DbState, Mutation } from './codec';
 import type { BankDbState, BankMutation } from '../modules/question-bank/database/codec';
 export interface DatabaseDriver {
+  searchBank(request: BankSearchRequest): Promise<BankSearchResult>;
   load(): Promise<DbState>;
   commit(mutations: Mutation[], expectedRevision: number): Promise<number>;
   loadBank(): Promise<BankDbState>;
@@ -12,6 +14,7 @@ let instance: Promise<DatabaseDriver> | undefined;
 export function getDriver(): Promise<DatabaseDriver> {
   instance ??= isDesktop
     ? Promise.resolve({
+        searchBank: (request) => invoke<BankSearchResult>('search_question_bank', { request }),
         load: () => invoke<DbState>('load_database'),
         commit: (mutations: Mutation[], expectedRevision: number) =>
           invoke<number>('commit_database', { mutations, expectedRevision }),

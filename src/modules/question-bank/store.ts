@@ -3,6 +3,7 @@ import { errorText } from '../../app/store';
 import { getDriver } from '../../database/driver';
 import { bankSnapshotSchema, emptyBankSnapshot, type BankSnapshot } from './domain/model';
 import { decodeBank, diffBank } from './database/codec';
+import { withBankMetadata } from './domain/bankMetadata';
 import { mergeKntt } from './domain/kntt';
 import { mergeMathHubId6 } from './domain/mathhubCurriculum';
 
@@ -42,8 +43,9 @@ export const useQuestionBank = create<QuestionBankStore>((set, get) => ({
         const legacy = mergeMathHubId6(decoded.curriculumNodes);
         const seeded = mergeKntt(legacy);
         const merged = seeded.length === legacy.length ? legacy : seeded;
-        const data =
-          merged === decoded.curriculumNodes ? decoded : { ...decoded, curriculumNodes: merged };
+        const data = withBankMetadata(
+          merged === decoded.curriculumNodes ? decoded : { ...decoded, curriculumNodes: merged },
+        );
         const revision =
           data === decoded
             ? loaded.revision
@@ -69,7 +71,7 @@ export const useQuestionBank = create<QuestionBankStore>((set, get) => ({
     set({ busy: true });
     try {
       const before = get().data;
-      const proposed = recipe(before);
+      const proposed = withBankMetadata(recipe(before), before);
       const after = bankSnapshotSchema.parse(proposed);
       const mutations = diffBank(before, after, proposed);
       if (mutations.length) {

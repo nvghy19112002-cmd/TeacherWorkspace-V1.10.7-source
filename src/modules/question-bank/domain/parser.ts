@@ -26,16 +26,25 @@ export function detectQuestionType(source: string): Question['questionType'] {
 
 export function parseExTest(source: string): ParsedQuestion[] {
   const masked = maskComments(source);
-  const matches = [...masked.matchAll(/\\begin\{ex\}(?:\[[^\]]*\])?([\s\S]*?)\\end\{ex\}/g)];
-  if ((masked.match(/\\begin\{ex\}/g) ?? []).length !== matches.length)
-    throw new Error(
-      'Có môi trường ex chưa đóng hoặc lồng nhau. Hãy sửa file trước khi nhập để tránh bỏ sót câu.',
-    );
-  const chunks = matches.length
-    ? matches.map((match) => source.slice(match.index, match.index + match[0].length))
-    : source.trim()
-      ? [source]
-      : [];
+  const blocks: string[] = [];
+  let depth = 0,
+    start = 0;
+  for (const match of masked.matchAll(/\\(begin|end)\s*\{\s*ex\s*\}/g)) {
+    let escapes = 0;
+    for (let i = match.index - 1; i >= 0 && masked[i] === '\\'; i--) escapes++;
+    if (escapes % 2) continue;
+    if (match[1] === 'begin') {
+      if (depth === 0) start = match.index;
+      depth++;
+    } else {
+      if (depth === 0)
+        throw new Error('Có môi trường ex đóng khi chưa mở. Hãy sửa trước khi nhập.');
+      if (--depth === 0) blocks.push(source.slice(start, match.index + match[0].length));
+    }
+  }
+  if (depth)
+    throw new Error('Có môi trường ex chưa đóng. Hãy sửa file trước khi nhập để tránh bỏ sót câu.');
+  const chunks = blocks.length ? blocks : source.trim() ? [source] : [];
   return chunks.map((rawSource) => {
     const clean = maskComments(rawSource);
     const questionType = detectQuestionType(clean);
@@ -53,6 +62,10 @@ export function parseExTest(source: string): ParsedQuestion[] {
     const inspections = ids.map(inspectId6);
     const sourceId = ids.length === 1 && inspections[0].state === 'valid' ? ids[0] : undefined;
     const warnings: string[] = [];
+    if ((clean.match(/\\begin\s*\{\s*ex\s*\}/g) ?? []).length > 1)
+      warnings.push(
+        'Môi trường ex lồng nhau đã được giữ nguyên trong câu ngoài. Cần đối chiếu và tách câu thủ công trước khi duyệt.',
+      );
     if (ids.length > 1)
       warnings.push(`Có nhiều ID nguồn (${ids.join(', ')}); chọn ID đúng khi phân loại.`);
     if (ids.length === 1 && inspections[0].state !== 'valid')

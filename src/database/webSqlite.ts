@@ -2,6 +2,8 @@ import initSqlJs, { type Database, type SqlJsStatic } from 'sql.js';
 import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import migration from './migrations/001_initial.sql?raw';
 import bankMigration from './migrations/002_question_bank.sql?raw';
+import searchMigration from './migrations/003_question_search.sql?raw';
+import { searchBankSqlite } from '../modules/question-bank/database/search';
 import {
   TABLES,
   mutationSql,
@@ -46,14 +48,19 @@ function writeBytes(idb: IDBDatabase, bytes: Uint8Array): Promise<void> {
     tx.onabort = () => reject(tx.error ?? new Error('Lưu dữ liệu bị gián đoạn.'));
   });
 }
-export function initializeSqlite(SQL: SqlJsStatic, bytes?: Uint8Array): Database {
+export function initializeSqlite(
+  SQL: SqlJsStatic,
+  bytes?: Uint8Array,
+  onUpgrade?: (version: number, original: Uint8Array) => void,
+): Database {
   const db = new SQL.Database(bytes);
   db.run('PRAGMA foreign_keys=ON');
   const version = Number(db.exec('PRAGMA user_version')[0].values[0][0]);
-  if (version > 2) {
+  if (version > 3) {
     db.close();
     throw new Error('Database được tạo bởi phiên bản mới hơn. Hãy cập nhật ứng dụng.');
   }
+  if (version < 3) onUpgrade?.(version, db.export());
   if (version < 1) {
     db.run('BEGIN IMMEDIATE');
     try {
@@ -78,6 +85,18 @@ export function initializeSqlite(SQL: SqlJsStatic, bytes?: Uint8Array): Database
       throw error;
     }
   }
+  if (version < 3) {
+    db.run('BEGIN IMMEDIATE');
+    try {
+      db.run(searchMigration);
+      db.run('PRAGMA user_version=3');
+      db.run('COMMIT');
+    } catch (error) {
+      db.run('ROLLBACK');
+      db.close();
+      throw error;
+    }
+  }
   return db;
 }
 
@@ -87,15 +106,16 @@ export function readBankState(db: Database): BankDbState {
     const result = db.exec(`SELECT * FROM ${table}`)[0];
     tables[table] = result
       ? result.values.map(
-          (row) => Object.fromEntries(result.columns.map((column, index) => [column, row[index]])) as DbRow,
+          (row) =>
+            Object.fromEntries(
+              result.columns.map((column, index) => [column, row[index]]),
+            ) as DbRow,
         )
       : [];
   }
   return {
     tables,
-    revision: Number(
-      db.exec('SELECT revision FROM question_bank_meta WHERE id=1')[0].values[0][0],
-    ),
+    revision: Number(db.exec('SELECT revision FROM question_bank_meta WHERE id=1')[0].values[0][0]),
   };
 }
 
@@ -166,13 +186,46 @@ export async function createWebDriver(): Promise<DatabaseDriver> {
     throw new Error('Trình duyệt cần hỗ trợ Web Locks. Hãy dùng Edge/Chrome hoặc bản desktop.');
   const SQL = await initSqlJs({ locateFile: () => wasmUrl });
   const idb = await openIdb();
+  async function openCurrent() {
+    const bytes = await readBytes(idb);
+    let backup: { version: number; original: Uint8Array } | undefined;
+    const db = initializeSqlite(SQL, bytes, (version, original) => {
+      backup = { version, original };
+    });
+    if (backup) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const tx = idb.transaction('files', 'readwrite'),
+            files = tx.objectStore('files');
+          if (bytes)
+            files.put(backup!.original, `before-migration-v${backup!.version}-${Date.now()}`);
+          files.put(db.export(), 'main');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+          tx.onabort = () =>
+            reject(tx.error ?? new Error('Không lưu được backup trước migration.'));
+        });
+      } catch (error) {
+        db.close();
+        throw error;
+      }
+    }
+    return db;
+  }
   return {
+    searchBank: async (request) =>
+      await navigator.locks.request(DB_NAME, async () => {
+        const db = await openCurrent();
+        try {
+          return searchBankSqlite(db, request);
+        } finally {
+          db.close();
+        }
+      }),
     load: async () =>
       await navigator.locks.request(DB_NAME, async () => {
-        const bytes = await readBytes(idb);
-        const db = initializeSqlite(SQL, bytes);
+        const db = await openCurrent();
         try {
-          if (!bytes) await writeBytes(idb, db.export());
           return readState(db);
         } finally {
           db.close();
@@ -180,7 +233,7 @@ export async function createWebDriver(): Promise<DatabaseDriver> {
       }),
     commit: async (mutations, expected) =>
       await navigator.locks.request(DB_NAME, async () => {
-        const db = initializeSqlite(SQL, await readBytes(idb));
+        const db = await openCurrent();
         try {
           const revision = commitSqlite(db, mutations, expected);
           await writeBytes(idb, db.export());
@@ -191,7 +244,7 @@ export async function createWebDriver(): Promise<DatabaseDriver> {
       }),
     loadBank: async () =>
       await navigator.locks.request(DB_NAME, async () => {
-        const db = initializeSqlite(SQL, await readBytes(idb));
+        const db = await openCurrent();
         try {
           return readBankState(db);
         } finally {
@@ -200,7 +253,7 @@ export async function createWebDriver(): Promise<DatabaseDriver> {
       }),
     commitBank: async (mutations, expected) =>
       await navigator.locks.request(DB_NAME, async () => {
-        const db = initializeSqlite(SQL, await readBytes(idb));
+        const db = await openCurrent();
         try {
           const revision = commitBankSqlite(db, mutations, expected);
           await writeBytes(idb, db.export());

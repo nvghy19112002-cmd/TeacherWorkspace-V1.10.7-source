@@ -18,3 +18,10 @@ Baseline commit e3d8e81: `npm run check` đạt lint, 198 Vitest tests / 26 file
 ## Chưa xác thực
 
 Không có kết quả native Rust/Windows hoặc installer V2 trong máy Linux này; không gọi Gemini trả phí và không đo độ chính xác phân loại toán học. Cần bộ nhãn chuẩn giáo viên xác nhận để đánh giá retrieval và classification riêng. Không có database giáo viên thật, install.rar hoặc audit markdown đính kèm để kiểm tra những dữ liệu đó.
+
+## M2
+
+- `npm run check`: 242 Vitest tests / 31 files, lint, TypeScript, 14 release tests, production build đạt.
+- 10 E2E AI/bank/import/library liên quan đạt trên thay đổi search/parser ban đầu; sau metadata integration, 7 E2E search/pagination/library/import đạt.
+- 5 Rust database tests đạt qua isolated verification (logic DB và bundled SQLite thật; không gồm Tauri IPC/GTK hoặc toàn app Windows).
+- Không sửa migration 001/002. Migration 003 từ v2 giữ nguyên 200 source và có backup mở lại được.

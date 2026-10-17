@@ -4,7 +4,10 @@ import { bankSnapshotSchema, emptyBankSnapshot, type BankSnapshot } from '../dom
 export const BANK_TABLES = [
   'curriculum_nodes',
   'learning_outcomes',
+  'question_tags',
+  'import_jobs',
   'questions',
+  'question_assets',
   'question_revisions',
   'classification_runs',
   'exams',
@@ -34,6 +37,32 @@ const parseArray = (value: SqlValue): string[] => {
 
 export function encodeBank(data: BankSnapshot): BankDbTables {
   return {
+    question_tags: data.tagDefinitions.map((r) => ({
+      id: r.id,
+      name: r.name,
+      color: r.color,
+      created_at: r.createdAt,
+    })),
+    import_jobs: data.importJobs.map((r) => ({
+      id: r.id,
+      source_name: r.sourceName,
+      status: r.status,
+      total_count: r.totalCount,
+      imported_count: r.importedCount,
+      error_json: r.errorJson,
+      created_at: r.createdAt,
+      updated_at: r.updatedAt,
+    })),
+    question_assets: data.assets.map((r) => ({
+      id: r.id,
+      question_id: r.questionId,
+      name: r.name,
+      relative_path: r.relativePath,
+      mime_type: r.mimeType,
+      checksum: r.checksum,
+      missing: +r.missing,
+      created_at: r.createdAt,
+    })),
     curriculum_nodes: data.curriculumNodes.map((row) => ({
       id: row.id,
       parent_id: row.parentId,
@@ -132,6 +161,32 @@ export function decodeBank(tables?: BankDbTables): BankSnapshot {
   if (!tables) return emptyBankSnapshot();
   return bankSnapshotSchema.parse({
     schemaVersion: 1,
+    tagDefinitions: (tables.question_tags ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      color: r.color,
+      createdAt: r.created_at,
+    })),
+    importJobs: (tables.import_jobs ?? []).map((r) => ({
+      id: r.id,
+      sourceName: r.source_name,
+      status: r.status,
+      totalCount: r.total_count,
+      importedCount: r.imported_count,
+      errorJson: r.error_json,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    })),
+    assets: (tables.question_assets ?? []).map((r) => ({
+      id: r.id,
+      questionId: r.question_id,
+      name: r.name,
+      relativePath: r.relative_path,
+      mimeType: r.mime_type,
+      checksum: r.checksum,
+      missing: !!r.missing,
+      createdAt: r.created_at,
+    })),
     curriculumNodes: tables.curriculum_nodes.map((row) => ({
       id: row.id,
       parentId: row.parent_id,
@@ -229,6 +284,9 @@ export function decodeBank(tables?: BankDbTables): BankSnapshot {
 const snapshotFields = {
   curriculum_nodes: 'curriculumNodes',
   learning_outcomes: 'learningOutcomes',
+  question_tags: 'tagDefinitions',
+  question_assets: 'assets',
+  import_jobs: 'importJobs',
   questions: 'questions',
   question_revisions: 'revisions',
   classification_runs: 'classificationRuns',

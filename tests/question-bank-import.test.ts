@@ -55,9 +55,12 @@ describe('Question bank import and LaTeX boundaries', () => {
     expect(rows[0].answer).toBe('');
     expect(rows[0].warnings.join(' ')).toContain('đúng một');
   });
-  it('rejects incomplete and nested ex blocks instead of silently dropping questions', () => {
+  it('rejects incomplete blocks and preserves nested ex blocks with a review warning', () => {
     expect(() => parseExTest(wrap('Đủ') + '\\begin{ex}Thiếu')).toThrow('chưa đóng');
-    expect(() => parseExTest(wrap(wrap('Lồng')))).toThrow('lồng nhau');
+    const nested = parseExTest(wrap(wrap('Lồng')));
+    expect(nested).toHaveLength(1);
+    expect(nested[0].rawSource).toBe(wrap(wrap('Lồng')));
+    expect(nested[0].warnings.some((message) => message.includes('lồng nhau'))).toBe(true);
   });
   it('handles escaped braces and line breaks at closing braces', () => {
     expect(commandBlock(String.raw`\loigiai{Tập $\{1,2\}$ và $\heva{a\\}$}`, 'loigiai')).toBe(

@@ -14,6 +14,9 @@ const TABLES: &[(&str, &[&str])] = &[
 const BANK_TABLES: &[(&str, &[&str])] = &[
     ("curriculum_nodes", &["id", "parent_id", "kind", "code", "name", "description", "sort_order", "archived", "created_at", "updated_at"]),
     ("learning_outcomes", &["id", "node_id", "code", "content", "source", "active", "created_at", "updated_at"]),
+    ("question_tags", &["id", "name", "color", "created_at"]),
+    ("import_jobs", &["id", "source_name", "status", "total_count", "imported_count", "error_json", "created_at", "updated_at"]),
+    ("question_assets", &["id", "question_id", "name", "relative_path", "mime_type", "checksum", "missing", "created_at"]),
     ("questions", &["id", "display_id", "classification_code", "sequence_number", "raw_source", "normalized_source", "content_hash", "question_type", "answer", "solution", "level", "grade_node_id", "domain_node_id", "chapter_node_id", "lesson_node_id", "form_node_id", "primary_outcome_id", "secondary_outcome_ids", "tags", "source", "status", "confidence", "reasoning", "warnings", "has_image", "usage_count", "id_locked", "created_at", "updated_at", "deleted_at"]),
     ("question_revisions", &["id", "question_id", "snapshot", "reason", "created_at"]),
     ("classification_runs", &["id", "question_id", "provider", "model", "result_json", "accepted", "created_at"]),
@@ -23,6 +26,7 @@ const BANK_TABLES: &[(&str, &[&str])] = &[
 const MIGRATIONS: &[(i64, &str)] = &[
     (1, include_str!("../../src/database/migrations/001_initial.sql")),
     (2, include_str!("../../src/database/migrations/002_question_bank.sql")),
+    (3, include_str!("../../src/database/migrations/003_question_search.sql")),
 ];
 
 pub fn open(path: &Path) -> Result<Connection, String> {
@@ -38,6 +42,9 @@ pub fn open(path: &Path) -> Result<Connection, String> {
         let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|e| e.to_string())?.as_nanos();
         let backup = dir.join(format!("before-migration-v{}-{}.sqlite3", version, stamp));
         db.execute("VACUUM INTO ?1", [backup.to_string_lossy().as_ref()]).map_err(|e|e.to_string())?;
+        let verify = Connection::open_with_flags(&backup, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e|e.to_string())?;
+        let check: String = verify.query_row("PRAGMA quick_check", [], |row| row.get(0)).map_err(|e|e.to_string())?;
+        if check != "ok" { return Err("Backup before migration failed integrity verification".into()); }
     }
     for (number, sql) in MIGRATIONS {
         if *number > version {
@@ -166,9 +173,92 @@ pub fn commit_question_bank(state: tauri::State<'_, DatabaseState>, mutations: V
     let mut guard = state.0.lock().map_err(|_| "Database lock failed")?;
     commit_selected(guard.as_mut().map_err(|error| error.clone())?, mutations, expected_revision, BANK_TABLES, "question_bank_meta")
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BankSearchRequest { ordered_ids: Vec<String>, query: String, limit: u32, offset: u32 }
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BankSearchResult { revision: i64, total: usize, matched_ids: Vec<String>, page_ids: Vec<String> }
+fn search_bank(db: &Connection, request: BankSearchRequest) -> Result<BankSearchResult, String> {
+    if request.ordered_ids.len() > 100000 || request.query.chars().count() > 1000 || request.limit == 0 || request.limit > 200 || request.offset > 100000 || request.ordered_ids.iter().any(|id| id.is_empty() || id.chars().count() > 100) {
+        return Err("Invalid search request".into());
+    }
+    if request.ordered_ids.iter().collect::<std::collections::BTreeSet<_>>().len() != request.ordered_ids.len() { return Err("Duplicate search IDs".into()); }
+    let normalized = request.query.replace('đ', "d").replace('Đ', "D").to_lowercase();
+    let words: Vec<&str> = normalized.split(|c: char| !c.is_alphanumeric()).filter(|s| !s.is_empty()).collect();
+    if words.len() > 20 || words.iter().any(|w| w.chars().count() > 100) { return Err("Search supports at most 20 words of 100 characters".into()); }
+    let expression = words.iter().map(|w| format!("\"{}*\"", w)).collect::<Vec<_>>().join(" AND ");
+    let mut parameters = vec![Value::Text(serde_json::to_string(&request.ordered_ids).map_err(|e| e.to_string())?)];
+    let mut sql = "SELECT q.id FROM questions q JOIN json_each(?) AS selected ON selected.value=q.id WHERE q.deleted_at IS NULL".to_string();
+    if !expression.is_empty() {
+        sql.push_str(" AND q.rowid IN (SELECT docid FROM question_search WHERE question_search MATCH ?)");
+        parameters.push(Value::Text(expression));
+    }
+    sql.push_str(" ORDER BY CAST(selected.key AS INTEGER)");
+    let matched_ids = db.prepare(&sql).map_err(|e|e.to_string())?.query_map(params_from_iter(parameters.iter()), |row| row.get::<_, String>(0)).map_err(|e|e.to_string())?.collect::<Result<Vec<_>, _>>().map_err(|e|e.to_string())?;
+    parameters.push(Value::Integer(request.limit as i64));
+    parameters.push(Value::Integer(request.offset as i64));
+    let page_ids = db.prepare(&(sql + " LIMIT ? OFFSET ?")).map_err(|e|e.to_string())?.query_map(params_from_iter(parameters.iter()), |row| row.get::<_, String>(0)).map_err(|e|e.to_string())?.collect::<Result<Vec<_>, _>>().map_err(|e|e.to_string())?;
+    let revision = db.query_row("SELECT revision FROM question_bank_meta WHERE id=1", [], |row|row.get(0)).map_err(|e|e.to_string())?;
+    Ok(BankSearchResult { revision, total: matched_ids.len(), matched_ids, page_ids })
+}
+#[tauri::command]
+pub fn search_question_bank(state: tauri::State<'_, DatabaseState>, request: BankSearchRequest) -> Result<BankSearchResult, String> {
+    let guard = state.0.lock().map_err(|_| "Database lock failed")?;
+    search_bank(guard.as_ref().map_err(Clone::clone)?, request)
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn full_text_search_and_paging_preserve_sources() {
+        let db = open(Path::new(":memory:")).unwrap();
+        for id in ["a", "b", "c"] {
+            db.execute("INSERT INTO questions(id,raw_source,normalized_source,content_hash,question_type,level,status,created_at,updated_at) VALUES(?1,'Đạo hàm hàm số','x',?1,'essay','N','draft','2026-10-17','2026-10-17')", [id]).unwrap();
+        }
+        let found = search_bank(&db, BankSearchRequest { ordered_ids: vec!["c".into(), "b".into(), "a".into()], query: "dao ham".into(), limit: 1, offset: 1 }).unwrap();
+        assert_eq!(found.total, 3); assert_eq!(found.page_ids, vec!["b"]);
+        db.execute("UPDATE questions SET raw_source='Xác suất' WHERE id='b'", []).unwrap();
+        let found = search_bank(&db, BankSearchRequest { ordered_ids: vec!["c".into(), "b".into(), "a".into()], query: "dao ham".into(), limit: 10, offset: 0 }).unwrap();
+        assert_eq!(found.matched_ids, vec!["c", "a"]);
+    }
+    #[test]
+    fn asset_tag_and_import_metadata_roundtrip() {
+        let mut db = open(Path::new(":memory:")).unwrap();
+        db.execute("INSERT INTO questions(id,raw_source,normalized_source,content_hash,question_type,level,status,created_at,updated_at) VALUES('q','Original','x','x','essay','N','draft','2026-10-17','2026-10-17')", []).unwrap();
+        let metadata = [
+            ("question_tags", serde_json::json!({"id":"tag", "name":"Geometry", "color":"", "created_at":"2026-10-17"})),
+            ("question_assets", serde_json::json!({"id":"asset", "question_id":"q", "name":"figure.png", "relative_path":"figure.png", "mime_type":"image/png", "checksum":"", "missing":1, "created_at":"2026-10-17"})),
+            ("import_jobs", serde_json::json!({"id":"job", "source_name":"input.tex", "status":"committed", "total_count":1, "imported_count":1, "error_json":"[]", "created_at":"2026-10-17", "updated_at":"2026-10-17"})),
+        ];
+        let mutations = metadata.into_iter().map(|(table, row)| Mutation { table:table.into(), id:row["id"].as_str().unwrap().into(), row:Some(row.as_object().unwrap().clone()) }).collect();
+        assert_eq!(commit_selected(&mut db, mutations, 0, BANK_TABLES, "question_bank_meta").unwrap(), 1);
+        let restored = read_bank(&db).unwrap();
+        assert_eq!(restored.tables["question_assets"].len(), 1);
+        assert_eq!(restored.tables["import_jobs"].len(), 1);
+    }
+    #[test]
+    fn upgrades_a_v2_file_only_after_creating_a_restorable_backup() {
+        let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+        let dir = std::env::temp_dir().join(format!("teacher-db-upgrade-{}", stamp));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("old.sqlite3");
+        {
+            let old = Connection::open(&path).unwrap();
+            old.execute_batch(MIGRATIONS[0].1).unwrap(); old.execute_batch(MIGRATIONS[1].1).unwrap();
+            old.pragma_update(None, "user_version", 2).unwrap();
+            old.execute("INSERT INTO questions(id,raw_source,normalized_source,content_hash,question_type,level,status,created_at,updated_at) VALUES('q','Original source','x','x','essay','N','draft','2026-10-17','2026-10-17')", []).unwrap();
+        }
+        let upgraded = open(&path).unwrap();
+        let backup = std::fs::read_dir(dir.join("backups")).unwrap().next().unwrap().unwrap().path();
+        {
+            let restored = Connection::open_with_flags(backup, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+            assert_eq!(restored.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0)).unwrap(), 2);
+            assert_eq!(restored.query_row("SELECT raw_source FROM questions WHERE id='q'", [], |r| r.get::<_, String>(0)).unwrap(), "Original source");
+        }
+        assert_eq!(upgraded.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0)).unwrap(), 3);
+        drop(upgraded); std::fs::remove_dir_all(dir).unwrap();
+    }
     #[test]
     fn migration_and_revision_guard() {
         let mut db = open(Path::new(":memory:")).unwrap();

@@ -40,7 +40,8 @@ import {
   X,
 } from 'lucide-react';
 import { errorText } from '../../app/store';
-import { isDesktop } from '../../database/driver';
+import { getDriver, isDesktop } from '../../database/driver';
+import type { BankSearchResult } from './database/search';
 import { Modal } from '../../components/Modal';
 import { useToasts } from '../../components/feedback';
 import { saveFile } from '../../services/files';
@@ -51,6 +52,7 @@ import { id6NodePath } from './domain/mathhubCurriculum';
 import { activeKnttNodes } from './domain/classificationContext';
 import { questionGrade, gradeNumber } from './domain/curriculumPresentation';
 import { curriculumPath } from './domain/curriculum';
+import { exactQuestionSource } from './domain/normalize';
 import { findDuplicateCandidates, type DuplicateCandidate } from './domain/duplicates';
 import { createExam, examToLatex } from './domain/exams';
 import {
@@ -88,7 +90,8 @@ function exactDuplicateCandidates(questions: Question[]): DuplicateCandidate[] {
   for (const question of questions) {
     const group = groups.get(question.contentHash) ?? [];
     for (const previous of group)
-      output.push({ left: previous, right: question, score: 100, method: 'hash' });
+      if (exactQuestionSource(previous.rawSource) === exactQuestionSource(question.rawSource))
+        output.push({ left: previous, right: question, score: 100, method: 'hash' });
     group.push(question);
     groups.set(question.contentHash, group);
   }
@@ -97,6 +100,7 @@ function exactDuplicateCandidates(questions: Question[]): DuplicateCandidate[] {
 
 export default function QuestionBankPage() {
   const data = useQuestionBank((state) => state.data);
+  const revision = useQuestionBank((state) => state.revision);
   const loadError = useQuestionBank((state) => state.error);
   const ready = useQuestionBank((state) => state.ready);
   const busy = useQuestionBank((state) => state.busy);
@@ -220,9 +224,8 @@ export default function QuestionBankPage() {
   const lessons = children(chapterId || null, 'lesson');
   const forms = children(lessonId || null, 'form');
 
-  const visible = useMemo(() => {
+  const candidates = useMemo(() => {
     const idNeedle = searchText(deferredIdQuery.trim());
-    const contentNeedle = searchText(deferredContentQuery.trim());
     return data.questions
       .filter((question) => {
         if (question.deletedAt) return false;
@@ -250,10 +253,6 @@ export default function QuestionBankPage() {
             searchText(
               `${question.displayId} ${question.classificationCode} ${question.rawSource.slice(0, 180)}`,
             ).includes(idNeedle)) &&
-          (!contentNeedle ||
-            searchText(
-              `${question.rawSource} ${question.tags.join(' ')} ${question.source}`,
-            ).includes(contentNeedle)) &&
           (!gradeId ||
             questionGrade(question, data.curriculumNodes) ===
               gradeNumber(curriculum.find((n) => n.id === gradeId)?.code ?? '')) &&
@@ -298,7 +297,6 @@ export default function QuestionBankPage() {
     data.curriculumNodes,
     curriculum,
     deferredIdQuery,
-    deferredContentQuery,
     gradeId,
     domainId,
     chapterId,
@@ -312,9 +310,70 @@ export default function QuestionBankPage() {
     reviewFilter,
   ]);
 
+  const [searchResult, setSearchResult] = useState<{
+    candidates: Question[];
+    query: string;
+    page: number;
+    revision: number;
+    value: BankSearchResult;
+  } | null>(null);
+  const [searchError, setSearchError] = useState('');
+  useEffect(() => {
+    if (!ready || busy) return;
+    let active = true;
+    setSearchError('');
+    void getDriver()
+      .then((driver) =>
+        driver.searchBank({
+          query: deferredContentQuery,
+          orderedIds: candidates.map((q) => q.id),
+          offset: (page - 1) * PAGE_SIZE,
+          limit: PAGE_SIZE,
+        }),
+      )
+      .then((value) => {
+        if (!active) return;
+        if (value.revision !== revision) {
+          setSearchError('Dữ liệu đã đổi ở cửa sổ khác. Hãy tải lại trước khi tiếp tục.');
+          return;
+        }
+        setSearchResult({ candidates, query: deferredContentQuery, page, revision, value });
+        const lastPage = Math.max(1, Math.ceil(value.total / PAGE_SIZE));
+        if (page > lastPage) setPage(lastPage);
+      })
+      .catch((error) => {
+        if (active) setSearchError(errorText(error));
+      });
+    return () => {
+      active = false;
+    };
+  }, [candidates, deferredContentQuery, page, ready, busy, revision]);
+  const currentSearch =
+    searchResult &&
+    searchResult.candidates === candidates &&
+    searchResult.query === deferredContentQuery &&
+    searchResult.page === page &&
+    searchResult.revision === revision
+      ? searchResult.value
+      : null;
+  const questionById = useMemo(
+    () => new Map(data.questions.map((q) => [q.id, q])),
+    [data.questions],
+  );
+  const visible = useMemo(
+    () =>
+      (currentSearch?.matchedIds ?? []).flatMap((id) => {
+        const q = questionById.get(id);
+        return q ? [q] : [];
+      }),
+    [currentSearch, questionById],
+  );
   const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const pageRows = visible.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageRows = (currentSearch?.pageIds ?? []).flatMap((id) => {
+    const q = questionById.get(id);
+    return q ? [q] : [];
+  });
   const selected = visible.find((question) => question.id === selectedId) ?? null;
   const viewedIndex = visible.findIndex((q) => q.id === selectedId);
   function moveViewed(offset: number) {
@@ -508,7 +567,33 @@ export default function QuestionBankPage() {
           ? uniqueImports(pendingImport, snapshot.questions).questions
           : pendingImport;
         count = rows.length;
-        return { ...snapshot, questions: [...snapshot.questions, ...rows] };
+        return {
+          ...snapshot,
+          questions: [...snapshot.questions, ...rows],
+          importJobs: [
+            ...snapshot.importJobs,
+            {
+              id: crypto.randomUUID(),
+              sourceName: [...new Set(pendingImport.map((q) => q.source))]
+                .join(', ')
+                .slice(0, 1000),
+              status: 'committed' as const,
+              totalCount: pendingImport.length,
+              importedCount: rows.length,
+              errorJson: JSON.stringify(
+                pendingImport
+                  .filter((q) => q.warnings.length)
+                  .slice(0, 200)
+                  .map((q) => ({
+                    questionId: q.id,
+                    warnings: q.warnings.slice(0, 3).map((w) => w.slice(0, 400)),
+                  })),
+              ),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        };
       });
       setPendingImport(null);
       toast(`Đã lưu ${count} câu. Câu trùng trong thùng rác có thể khôi phục từ nút Thùng rác.`);
@@ -955,7 +1040,13 @@ export default function QuestionBankPage() {
               </button>
             </div>
           )}
-          <div className="qb-table-wrap">
+          {searchError && <p role="alert">{searchError}</p>}
+          {!currentSearch && !searchError && (
+            <p className="muted" role="status">
+              Đang truy vấn ngân hàng…
+            </p>
+          )}
+          <div className="qb-table-wrap" aria-busy={!currentSearch && !searchError}>
             <table className="qb-question-table">
               <colgroup>
                 <col style={{ width: 38 }} />
@@ -1183,6 +1274,10 @@ export default function QuestionBankPage() {
                 </strong>
                 <span>
                   {selected.source || 'Chưa ghi nguồn'} · {STATUS_LABELS[selected.status]}
+                  {data.assets.filter((a) => a.questionId === selected.id && a.missing).length >
+                    0 && (
+                    <span> · Có tài nguyên chưa xác minh. Kiểm tra đường dẫn trong dự án TeX.</span>
+                  )}
                 </span>
               </div>
               <div className="qb-detail-meta-row">
