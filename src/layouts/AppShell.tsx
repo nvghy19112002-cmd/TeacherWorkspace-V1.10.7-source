@@ -1,4 +1,5 @@
 import {
+  PanelLeft,
   ChevronDown,
   ChevronsUpDown,
   Plus,
@@ -12,9 +13,10 @@ import {
 import type { ReactNode } from 'react';
 import pkg from '../../package.json';
 import { NAVIGATION } from '../app/navigation';
-import { useWorkspace } from '../app/store';
+import { useWorkspace, errorText } from '../app/store';
 import { useUi } from '../app/ui';
-import { useMutation } from '../components/feedback';
+import { readStudioLayout, saveStudioLayout } from '../app/studioLayout';
+import { useMutation, useToasts } from '../components/feedback';
 
 export function AppShell({
   children,
@@ -27,19 +29,29 @@ export function AppShell({
 }) {
   const data = useWorkspace((s) => s.data);
   const busy = useWorkspace((s) => s.busy);
+  const expanded = readStudioLayout(data.settings.moduleState?.studioLayout).sidebarExpanded;
   const navigate = useUi((s) => s.navigate);
   const setManager = useUi((s) => s.setWorkspaceManager);
   const openWork = useUi((s) => s.openWork);
   const mutate = useMutation();
+  const toast = useToasts((s) => s.push);
   const workspace = data.workspaces.find((w) => w.id === data.settings.activeWorkspaceId);
   return (
     <div className={`app-shell ${page === 'question-bank' ? 'bank-workspace' : ''}`}>
-      <aside className="sidebar icon-rail">
-        <div className="mac-window-dots" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
+      <aside className={`sidebar icon-rail ${expanded ? 'sidebar-expanded' : ''}`}>
+        <button
+          className="icon-button rail-toggle"
+          title={expanded ? 'Thu gọn điều hướng' : 'Mở rộng điều hướng'}
+          aria-label={expanded ? 'Thu gọn điều hướng' : 'Mở rộng điều hướng'}
+          aria-expanded={expanded}
+          onClick={() =>
+            void saveStudioLayout({ sidebarExpanded: !expanded }).catch((e) =>
+              toast(errorText(e), 'error'),
+            )
+          }
+        >
+          <PanelLeft size={18} />
+        </button>
         <div className="brand">
           <div className="brand-mark">
             <span />

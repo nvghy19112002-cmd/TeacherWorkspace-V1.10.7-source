@@ -1,0 +1,284 @@
+/* Academic Desktop Studio: shared tokens for every module and theme. */
+:root {
+  --studio-navy: #17365d;
+  --studio-teal: #237d83;
+  --studio-gold: #d9a65a;
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --sidebar: #ffffff;
+  --text: #17365d;
+  --muted: #56687f;
+  --border: #dde4ec;
+  --soft: #f0f4f8;
+  --accent: var(--studio-teal);
+  --accent-dark: #175f64;
+  --accent-soft: #e6f3f2;
+  --danger: #b33446;
+  --focus: #237d83;
+  --radius-control: 7px;
+  --radius-panel: 12px;
+  --radius-dialog: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --control-height: 34px;
+  --shadow: 0 5px 24px #17365d0b;
+  --shadow-raised: 0 14px 46px #10233f29;
+  --motion-fast: 130ms;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-code: 'Cascadia Code', Consolas, monospace;
+  font-family: var(--font-ui);
+}
+:root[data-theme='dark'] {
+  --bg: #161d29;
+  --surface: #1d2838;
+  --sidebar: #192333;
+  --text: #e9eff8;
+  --muted: #aab9cd;
+  --border: #344257;
+  --soft: #253347;
+  --accent: #80cdd1;
+  --accent-dark: #b2e8eb;
+  --accent-soft: #203e46;
+  --danger: #ff9baf;
+  --focus: #80cdd1;
+  --shadow: 0 6px 24px #00000024;
+}
+body {
+  color: var(--text);
+  background: var(--bg);
+}
+h1 {
+  font-size: 25px;
+  letter-spacing: -0.55px;
+}
+h2 {
+  font-size: 17px;
+}
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-ui);
+}
+input,
+select,
+textarea {
+  border-radius: var(--radius-control);
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+  min-height: var(--control-height);
+}
+.button {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  box-shadow: none;
+  transition:
+    background var(--motion-fast),
+    border-color var(--motion-fast);
+}
+.button.primary {
+  background: var(--accent);
+  color: var(--surface);
+  border: 1px solid var(--accent);
+  box-shadow: none;
+}
+:root[data-theme='dark'] .button.primary {
+  color: #102a33;
+}
+.button.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.button.secondary:hover {
+  background: var(--soft);
+  border-color: var(--accent);
+}
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.modal {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-raised);
+  color: var(--text);
+  background: var(--surface);
+}
+.modal-heading {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.modal-footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.icon-button:hover {
+  background: var(--soft);
+}
+.topbar {
+  height: 50px;
+  min-height: 50px;
+  background: var(--surface);
+  border-color: var(--border);
+  backdrop-filter: none;
+}
+.app-shell .sidebar.icon-rail {
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  backdrop-filter: none;
+  padding-top: 10px;
+}
+.sidebar .rail-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 34px;
+  margin: 0 auto 8px;
+  flex-shrink: 0;
+}
+.sidebar.icon-rail .brand {
+  margin: 2px 0 15px;
+}
+.sidebar.icon-rail .workspace-picker {
+  margin-bottom: 12px;
+}
+.sidebar.icon-rail .nav-item {
+  height: 40px;
+  min-height: 40px;
+}
+.sidebar .nav-item.active {
+  background: var(--studio-navy);
+  color: #fff;
+  box-shadow: none;
+}
+:root[data-theme='dark'] .sidebar .nav-item.active {
+  background: #294b73;
+}
+.app-shell .sidebar.icon-rail.sidebar-expanded {
+  width: 208px;
+  padding-inline: 12px;
+  align-items: stretch;
+}
+.sidebar.icon-rail.sidebar-expanded .brand > div:last-child {
+  display: block;
+  font-size: 13px;
+}
+.sidebar.icon-rail.sidebar-expanded .brand {
+  gap: 8px;
+}
+.sidebar.icon-rail.sidebar-expanded .workspace-picker {
+  width: 100%;
+  justify-content: flex-start;
+}
+.sidebar.icon-rail.sidebar-expanded .workspace-picker > .truncate,
+.sidebar.icon-rail.sidebar-expanded .workspace-picker > svg {
+  display: inline;
+}
+.sidebar.icon-rail.sidebar-expanded .nav-item {
+  width: 100%;
+  padding: 0 12px;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.sidebar.icon-rail.sidebar-expanded .nav-item > span:not(.nav-dot) {
+  display: inline;
+  font-size: 12px;
+}
+.sidebar.icon-rail.sidebar-expanded .sidebar-bottom {
+  width: 100%;
+}
+.sidebar.icon-rail.sidebar-expanded .sidebar-version {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+.app-shell:has(.sidebar-expanded) .main-shell {
+  margin-left: 208px;
+  width: calc(100% - 208px);
+}
+.sidebar.icon-rail nav {
+  min-height: 0;
+  overflow-y: auto;
+}
+.page-heading {
+  margin-bottom: 18px;
+}
+.settings-workspace {
+  max-width: 1360px;
+  gap: 18px;
+  grid-template-columns: 214px minmax(0, 1fr);
+}
+.settings-nav {
+  max-height: calc(100dvh - 150px);
+  overflow-y: auto;
+  border-radius: var(--radius-panel);
+}
+.settings-nav button {
+  padding: 10px 8px;
+  border-radius: var(--radius-control);
+  gap: 10px;
+}
+.settings-content .panel {
+  padding: 20px;
+  border-radius: var(--radius-panel);
+}
+.qb-studio-header {
+  min-height: 54px;
+}
+.qb-studio .qb-header-title h1 {
+  font-size: 19px;
+}
+.qb-studio .qb-question-detail {
+  background: var(--surface);
+}
+.qb-studio .qb-library-sidebar {
+  padding-top: 14px;
+}
+.qb-studio .qb-library-toolbar {
+  background: var(--surface);
+}
+.qb-studio .qb-ai-warning {
+  border-color: var(--studio-gold);
+}
+.qb-studio pre,
+.classification-prompts pre,
+.classification-workspace pre {
+  font-family: var(--font-code);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.qb-studio .qb-table-wrap {
+  scrollbar-gutter: stable;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+.settings-content .field {
+  margin: 16px 0;
+}
+.settings-content > .panel > p + p {
+  margin-top: 8px;
+}
+.settings-content pre {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px/1.6 var(--font-code);
+}
+.detail-focused .studio-resize-handle {
+  display: none;
+}

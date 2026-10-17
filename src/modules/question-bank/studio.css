@@ -1,31 +1,3 @@
-.bank-workspace .main-content {
-  --bg: #f4f5f8;
-  --surface: #fff;
-  --sidebar: #f8f9fc;
-  --text: #20304b;
-  --muted: #738096;
-  --border: #e6eaf1;
-  --soft: #f3f5f9;
-  --accent: #294776;
-  --accent-dark: #19345e;
-  --accent-soft: #eaf0f9;
-  --focus: #5576b4;
-  --danger: #b45454;
-}
-:root[data-theme='dark'] .bank-workspace .main-content {
-  --bg: #111a29;
-  --surface: #182336;
-  --sidebar: #152031;
-  --text: #e2e8f3;
-  --muted: #9aa9c1;
-  --border: #2a3850;
-  --soft: #202e44;
-  --accent: #a9c4f0;
-  --accent-dark: #c2d7f9;
-  --accent-soft: #293e5e;
-  --focus: #a9c4f0;
-  --danger: #f59e9e;
-}
 /* Personal LaTeX library; scoped so Smart Schedule retains its layout. */
 .qb-saved-exams {
   max-height: 65vh;
@@ -1864,4 +1836,74 @@
   margin-top: 3px;
   margin-bottom: 12px;
   padding: 8px 10px;
+}
+/* V2 adjustable workbench. Three direct grid children retain keyboard navigation semantics. */
+.qb-studio:not(.detail-focused):not(.sidebar-hidden) .qb-studio-body {
+  grid-template-columns: minmax(170px, min(var(--library-width, 206px), 22%)) minmax(0, 1fr) minmax(
+      300px,
+      min(var(--reader-width, 430px), 48%)
+    );
+}
+.qb-studio.sidebar-hidden:not(.detail-focused) .qb-studio-body {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, min(var(--reader-width, 430px), 54%));
+}
+.qb-library-content,
+.qb-question-detail {
+  position: relative;
+  min-width: 0;
+}
+.studio-resize-handle {
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  padding: 0;
+  z-index: 5;
+  cursor: col-resize;
+  touch-action: none;
+  border-radius: 0;
+  background: transparent;
+}
+.studio-resize-handle:hover,
+.studio-resize-handle:focus-visible {
+  background: var(--accent);
+  opacity: 0.45;
+}
+.qb-studio .qb-question-table tbody tr:not(.qb-virtual-spacer) {
+  height: 96px;
+}
+.qb-studio .qb-question-open {
+  height: 95px;
+  padding: 9px 10px;
+  gap: 4px;
+  grid-template-rows: 16px 36px 16px;
+  overflow: hidden;
+}
+.qb-studio .qb-row-excerpt {
+  line-height: 18px;
+}
+.qb-studio .qb-row-meta {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 16px;
+}
+.qb-studio .qb-virtual-spacer,
+.qb-studio .qb-virtual-spacer td {
+  border: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+@container bank (max-width:950px) {
+  .qb-studio:not(.detail-focused):not(.sidebar-hidden) .qb-studio-body {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+  .qb-studio.sidebar-hidden:not(.detail-focused) .qb-studio-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .studio-resize-handle {
+    display: none;
+  }
 }

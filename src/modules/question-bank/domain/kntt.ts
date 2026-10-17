@@ -91,6 +91,8 @@ export function acceptKnttRun(
   const run = snapshot.classificationRuns.find((r) => r.id === runId);
   if (!run || run.accepted) throw new Error('Đề xuất không tồn tại hoặc đã áp dụng.');
   const raw = JSON.parse(run.resultJson);
+  if (raw.__teacherRejected)
+    throw new Error('Đề xuất đã bị giáo viên từ chối. Quét lại nếu cần đề xuất mới.');
   const original = classificationResultSchema.parse(raw);
   const result = correction
     ? resultForSelection(snapshot, original, correction.formId, correction.level)

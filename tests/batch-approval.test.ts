@@ -11,6 +11,7 @@ import {
 } from '../src/modules/question-bank/domain/classificationContext';
 import { classificationResultSchema } from '../src/modules/question-bank/domain/classification';
 import { parseExTest, parsedToQuestion } from '../src/modules/question-bank/domain/parser';
+import { rejectClassificationRun } from '../src/modules/question-bank/domain/classificationReview';
 
 function fixture() {
   const s = emptyBankSnapshot();
@@ -56,6 +57,21 @@ function fixture() {
   }
   return s;
 }
+it('records teacher rejection without changing the question or resurrecting old suggestions', () => {
+  const original = fixture();
+  original.classificationRuns.push({ ...original.classificationRuns[0], id: 'latest' });
+  expect(() => rejectClassificationRun(original, 'latest', 'no')).toThrow();
+  const rejected = rejectClassificationRun(original, 'latest', 'Sai dạng bài theo đối chiếu');
+  expect(rejected.questions).toEqual(original.questions);
+  expect(pendingKnttRuns(rejected, [original.questions[0].id])).toEqual([]);
+  expect(acceptKnttBatch(rejected, [original.questions[0].id]).applied).toEqual([]);
+  expect(JSON.parse(rejected.classificationRuns.at(-1)!.resultJson).__teacherRejected.reason).toBe(
+    'Sai dạng bài theo đối chiếu',
+  );
+  expect(
+    JSON.parse(original.classificationRuns.at(-1)!.resultJson).__teacherRejected,
+  ).toBeUndefined();
+});
 it('applies a batch without changing sources, with unique sequences and review status', () => {
   const s = fixture(),
     before = JSON.stringify(s);

@@ -15,6 +15,7 @@ export const NAVIGATION = [
   { id: 'statistics', label: 'Thống kê', icon: ChartNoAxesCombined },
   { id: 'documents', label: 'Kho đề & tài liệu', icon: FolderOpen },
   { id: 'question-bank', label: 'Ngân hàng câu hỏi', icon: LibraryBig },
+  { id: 'classification', label: 'AI phân loại', icon: Sparkles },
   { id: 'ai-tools', label: 'AI Tools', icon: Sparkles },
   { id: 'settings', label: 'Cài đặt', icon: Settings2 },
 ];

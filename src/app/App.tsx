@@ -4,11 +4,13 @@ import {
   Suspense,
   useDeferredValue,
   useEffect,
+  useRef,
   useLayoutEffect,
   type ComponentType,
   type ReactNode,
 } from 'react';
 import { LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react';
+import { readStudioLayout } from './studioLayout';
 import { useWorkspace } from './store';
 import { useUi } from './ui';
 import { AppShell } from '../layouts/AppShell';
@@ -32,6 +34,7 @@ const QuestionBankPage = lazy(async () => {
   await useQuestionBank.getState().initialize();
   return screen;
 });
+const ClassificationPage = lazy(() => import('../modules/question-bank/ClassificationWorkspace'));
 const AiToolsPage = lazy(() => import('../modules/ai-tools/AiToolsPage'));
 const ExportDialog = lazy(() =>
   import('../modules/schedule/components/ExportDialog').then((m) => ({ default: m.ExportDialog })),
@@ -45,6 +48,7 @@ const SCREENS: Record<string, ComponentType> = {
   settings: SettingsPage,
   'question-bank': QuestionBankPage,
   'ai-tools': AiToolsPage,
+  classification: ClassificationPage,
 };
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
   state: { error: string | null } = { error: null };
@@ -73,6 +77,14 @@ function WorkspaceApp() {
   const ready = useWorkspace((s) => s.ready);
   const error = useWorkspace((s) => s.error);
   const theme = useWorkspace((s) => s.data.settings.theme);
+  const layoutRaw = useWorkspace((s) => s.data.settings.moduleState?.studioLayout);
+  const startupNavigated = useRef(false);
+  useEffect(() => {
+    if (ready && !startupNavigated.current) {
+      startupNavigated.current = true;
+      useUi.getState().navigate(readStudioLayout(layoutRaw).startPage);
+    }
+  }, [ready, layoutRaw]);
   const requestedPage = useUi((s) => s.page);
   const page = useDeferredValue(requestedPage);
   useLayoutEffect(() => {

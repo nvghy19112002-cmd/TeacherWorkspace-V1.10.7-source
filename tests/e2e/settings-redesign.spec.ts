@@ -24,6 +24,7 @@ test('settings groups, compact icon rail, bulk keys and dynamic model diagnostic
   const rail = page.locator('.icon-rail');
   expect((await rail.boundingBox())!.width).toBe(64);
   await expect(rail.locator('.nav-item').first()).toHaveAttribute('title', 'Dashboard');
+  await page.getByRole('button', { name: 'API key Khóa, thứ tự và kết nối', exact: true }).click();
   await page.getByText('Nhập nhiều API key', { exact: true }).click();
   await page
     .getByLabel('Mỗi dòng một key')
@@ -32,6 +33,9 @@ test('settings groups, compact icon rail, bulk keys and dynamic model diagnostic
   await expect(page.locator('.key-row')).toHaveCount(2);
   await expect(page.getByLabel('Mỗi dòng một key')).toBeEmpty();
   await page.getByRole('combobox', { name: 'Cách dùng key' }).selectOption('round_robin');
+  await page
+    .getByRole('button', { name: 'Model Danh sách và thử structured output', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Tải model', exact: true }).click();
   await expect(
     page.getByRole('combobox', { name: 'Model dùng chung' }).locator('option'),
@@ -51,7 +55,7 @@ test('settings groups, compact icon rail, bulk keys and dynamic model diagnostic
   await expect(page.getByRole('button', { name: 'Xuất backup', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cập nhật Phiên bản và bộ cài Windows' }).click();
   await expect(page.getByRole('button', { name: 'Chọn file cập nhật (.exe)' })).toBeVisible();
-  await page.getByRole('button', { name: 'AI & API key Model, kết nối và danh sách key' }).click();
+  await page.getByRole('button', { name: 'API key Khóa, thứ tự và kết nối' }).click();
   await expect(page.getByRole('combobox', { name: 'Cách dùng key' })).toHaveValue('round_robin');
   await page.screenshot({ path: 'test-results/settings-new-private.png', fullPage: true });
   await page.setViewportSize({ width: 1024, height: 768 });

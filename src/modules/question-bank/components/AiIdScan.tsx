@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal } from '../../../components/Modal';
 import { useToasts } from '../../../components/feedback';
+import { useUi } from '../../../app/ui';
 import { errorText, useWorkspace } from '../../../app/store';
 import { readAiState } from '../../ai-tools/services/state';
 import { KnttSetup } from './KnttSetup';
 import { KnttCatalogStatus } from './KnttCatalogStatus';
 import { QuestionPreview } from './QuestionPreview';
+import { rejectClassificationRun } from '../domain/classificationReview';
+import { saveFile } from '../../../services/files';
 import { acceptKnttRun } from '../domain/kntt';
 import { acceptKnttBatch, pendingKnttRuns } from '../domain/batchApproval';
 import {
@@ -69,6 +72,7 @@ function Suggestion({
   const [lessonId, setLessonId] = useState(parsed?.result.lessonId ?? '');
   const [level, setLevel] = useState<Question['level']>(parsed?.result.level ?? 'N');
   const [reason, setReason] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
   const [touched, setTouched] = useState(false);
   if (!parsed) return <p>Đề xuất cũ không hợp lệ; quét lại để nhận kết quả mới.</p>;
   const { raw, result } = parsed;
@@ -140,7 +144,13 @@ function Suggestion({
       <summary>
         {question?.displayId || 'Câu chưa có ID'} ·{' '}
         {corrected.proposedClassificationCode || 'Chưa đủ mã'} ·{' '}
-        {run.accepted ? 'Đã áp dụng' : stale ? 'Cần quét lại' : 'Chờ giáo viên duyệt'}
+        {run.accepted
+          ? 'Đã áp dụng'
+          : raw.__teacherRejected
+            ? 'Đã từ chối'
+            : stale
+              ? 'Cần quét lại'
+              : 'Chờ giáo viên duyệt'}
       </summary>
       <small>
         {run.model} · {raw.__promptVersion || 'Prompt cũ chưa có phiên bản'} ·{' '}
@@ -198,7 +208,10 @@ function Suggestion({
               {v}
             </p>
           ))}
-          {!run.accepted && (
+          {raw.__teacherRejected && (
+            <p className="qb-ai-warning">Giáo viên từ chối: {raw.__teacherRejected.reason}</p>
+          )}
+          {!run.accepted && !raw.__teacherRejected && (
             <>
               <label className="field">
                 Bài KNTT sau đối chiếu
@@ -298,6 +311,32 @@ function Suggestion({
               >
                 Duyệt và áp dụng phân loại
               </button>
+              <label className="field">
+                Lý do từ chối
+                <input
+                  aria-label="Lý do từ chối đề xuất"
+                  value={rejectionReason}
+                  maxLength={500}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  disabled={disabled}
+                />
+              </label>
+              <button
+                className="button secondary small"
+                disabled={disabled || rejectionReason.trim().length < 5}
+                onClick={() =>
+                  void useQuestionBank
+                    .getState()
+                    .commit((s) => rejectClassificationRun(s, run.id, rejectionReason))
+                    .then(() => {
+                      onEdit(run.id, false);
+                      toast('Đã từ chối đề xuất; ID câu được giữ nguyên.');
+                    })
+                    .catch((e) => onError(errorText(e)))
+                }
+              >
+                Từ chối đề xuất
+              </button>
             </>
           )}
           {raw.__teacherCorrection && <p>Giáo viên sửa: {raw.__teacherCorrection.reason}</p>}
@@ -306,7 +345,15 @@ function Suggestion({
     </details>
   );
 }
-export function AiIdScan({ questions, onClose }: { questions: Question[]; onClose: () => void }) {
+export function AiIdScan({
+  questions,
+  onClose,
+  embedded = false,
+}: {
+  questions: Question[];
+  onClose: () => void;
+  embedded?: boolean;
+}) {
   const data = useQuestionBank((s) => s.data),
     busy = useQuestionBank((s) => s.busy);
   const settings = useWorkspace((s) => s.data.settings);
@@ -317,7 +364,7 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
   const matchingJob =
     restored && restored.rows.every((r) => selectionIds.has(r.id)) ? restored : null;
   const [running, setRunning] = useState(false),
-    [started, setStarted] = useState(Boolean(matchingJob)),
+    [started, setStarted] = useState(embedded || Boolean(matchingJob)),
     [error, setError] = useState('');
   const [scopeId, setScopeId] = useState(matchingJob?.scopeId ?? ''),
     [force, setForce] = useState(false),
@@ -328,6 +375,27 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
     ReturnType<typeof acceptKnttBatch>,
     'applied' | 'skipped'
   > | null>(null);
+  useEffect(() => {
+    if (!dirtyRuns.size) return;
+    const previous = useUi.getState().navigationGuard;
+    const guard = () =>
+      window.confirm('Có chỉnh sửa đề xuất chưa áp dụng. Rời màn hình và bỏ các chỉnh sửa này?') &&
+      (!previous || previous());
+    useUi.setState({ navigationGuard: guard });
+    return () => {
+      if (useUi.getState().navigationGuard === guard) useUi.setState({ navigationGuard: previous });
+    };
+  }, [dirtyRuns]);
+  function closeScan() {
+    if (
+      !embedded &&
+      dirtyRuns.size &&
+      !window.confirm('Có chỉnh sửa đề xuất chưa áp dụng. Đóng và bỏ chỉnh sửa?')
+    )
+      return;
+    controller.current?.abort();
+    onClose();
+  }
   const controller = useRef<AbortController | null>(null);
   const authorized = useRef(false);
   useEffect(() => () => controller.current?.abort(), []);
@@ -342,6 +410,7 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
     ['grade', 'chapter', 'lesson'].includes(n.kind),
   );
   const ids = new Set(questions.map((q) => q.id));
+  const [lowConfidenceOnly, setLowConfidenceOnly] = useState(false);
   const [allVersions, setAllVersions] = useState(false);
   const [historyPage, setHistoryPage] = useState(0);
   const allHistory = data.classificationRuns
@@ -356,8 +425,17 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
         seen.add(r.questionId);
         return true;
       });
-  const page = Math.min(historyPage, Math.max(0, Math.ceil(history.length / 20) - 1));
-  const visibleHistory = history.slice(page * 20, page * 20 + 20);
+  const filteredHistory = lowConfidenceOnly
+    ? history.filter((r) => {
+        try {
+          return JSON.parse(r.resultJson).confidence < 0.65;
+        } catch {
+          return true;
+        }
+      })
+    : history;
+  const page = Math.min(historyPage, Math.max(0, Math.ceil(filteredHistory.length / 20) - 1));
+  const visibleHistory = filteredHistory.slice(page * 20, page * 20 + 20);
   const failed = rows.filter(resumableRow);
   async function start(retry = false, explicitConsent = false) {
     if (controller.current || busy || !model) return;
@@ -525,21 +603,8 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
       setError(errorText(e));
     }
   }
-  return (
-    <Modal
-      title="Gán ID tự động"
-      subtitle={
-        started
-          ? 'Kết quả quét · Giáo viên duyệt trước khi áp dụng.'
-          : 'Xác nhận để AI phân loại theo mục lục KNTT.'
-      }
-      onClose={() => {
-        controller.current?.abort();
-        onClose();
-      }}
-      wide={started}
-      className={started ? 'qb-ai-results-dialog' : 'qb-ai-confirm-dialog'}
-    >
+  const body = (
+    <>
       <div className="modal-body qb-ai-scan">
         <p>
           <strong>{questions.length} câu đã chọn</strong> · Gemini ·{' '}
@@ -680,7 +745,18 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                 </ul>
               </details>
             )}
-            <h3>Đề xuất để đối chiếu ({history.length})</h3>
+            <h3>Đề xuất để đối chiếu ({filteredHistory.length})</h3>
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={lowConfidenceOnly}
+                onChange={(e) => {
+                  setLowConfidenceOnly(e.target.checked);
+                  setHistoryPage(0);
+                }}
+              />{' '}
+              Chỉ xem độ tin cậy dưới 65%
+            </label>
             <details className="qb-ai-history-options">
               <summary>Lịch sử các lần quét</summary>
               <label>
@@ -695,7 +771,7 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                 Xem cả các lần quét cũ của từng câu
               </label>
             </details>
-            {history.length > 20 && (
+            {filteredHistory.length > 20 && (
               <div className="qb-ai-history-pages">
                 <button
                   className="button secondary small"
@@ -705,11 +781,11 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                   Trang trước
                 </button>
                 <span>
-                  {page + 1}/{Math.ceil(history.length / 20)}
+                  {page + 1}/{Math.ceil(filteredHistory.length / 20)}
                 </span>
                 <button
                   className="button secondary small"
-                  disabled={(page + 1) * 20 >= history.length}
+                  disabled={(page + 1) * 20 >= filteredHistory.length}
                   onClick={() => setHistoryPage(page + 1)}
                 >
                   Trang sau
@@ -738,12 +814,39 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
         )}
       </div>
       <div className="modal-footer">
+        {started && (
+          <button
+            className="button secondary"
+            onClick={() =>
+              void saveFile(
+                `TeacherWorkspace-AI-${Date.now()}.json`,
+                new TextEncoder().encode(
+                  JSON.stringify(
+                    {
+                      type: 'teacher-workspace-ai-report',
+                      generatedAt: new Date().toISOString(),
+                      model,
+                      scopeId,
+                      rows,
+                      runs: allHistory,
+                    },
+                    null,
+                    2,
+                  ),
+                ),
+                'application/json',
+              ).catch((e) => setError(errorText(e)))
+            }
+          >
+            Xuất báo cáo quét
+          </button>
+        )}
         {running ? (
           <button className="button secondary" onClick={() => controller.current?.abort()}>
             Dừng quét
           </button>
         ) : (
-          <button className="button secondary" onClick={onClose}>
+          <button className="button secondary" onClick={closeScan}>
             Đóng
           </button>
         )}
@@ -770,9 +873,28 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
           disabled={running || busy || !model || !questions.length || !context.forms.length}
           onClick={() => void start(false, !started)}
         >
-          {started ? 'Quét lại' : 'Xác nhận và quét'}
+          {started ? (embedded ? 'Quét các câu đã chọn' : 'Quét lại') : 'Xác nhận và quét'}
         </button>
       </div>
+    </>
+  );
+  return embedded ? (
+    <section className="classification-workspace" aria-label="Không gian AI phân loại">
+      {body}
+    </section>
+  ) : (
+    <Modal
+      title="Gán ID tự động"
+      subtitle={
+        started
+          ? 'Kết quả quét · Giáo viên duyệt trước khi áp dụng.'
+          : 'Xác nhận để AI phân loại theo mục lục KNTT.'
+      }
+      onClose={closeScan}
+      wide={started}
+      className={started ? 'qb-ai-results-dialog' : 'qb-ai-confirm-dialog'}
+    >
+      {body}
     </Modal>
   );
 }

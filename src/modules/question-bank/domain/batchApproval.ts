@@ -11,7 +11,12 @@ export function pendingKnttRuns(snapshot: BankSnapshot, questionIds: string[]) {
     .filter((run) => {
       if (!selected.has(run.questionId) || seen.has(run.questionId)) return false;
       seen.add(run.questionId);
-      return !run.accepted;
+      if (run.accepted) return false;
+      try {
+        return !JSON.parse(run.resultJson).__teacherRejected;
+      } catch {
+        return true;
+      }
     });
 }
 

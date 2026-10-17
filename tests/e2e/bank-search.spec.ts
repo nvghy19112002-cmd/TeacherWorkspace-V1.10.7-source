@@ -15,9 +15,12 @@ test('SQLite search and pagination preserve Vietnamese search and page boundarie
     );
     await useQuestionBank.getState().commit((s: Record<string, unknown>) => ({ ...s, questions }));
   });
-  await expect(page.locator('.qb-question-table tbody tr')).toHaveCount(50);
+  await expect(page.locator('.qb-question-table')).toHaveAttribute('data-page-row-count', '50');
+  const rendered = await page.locator('.qb-question-table tbody tr[data-question-id]').count();
+  expect(rendered).toBeGreaterThan(0);
+  expect(rendered).toBeLessThan(50);
   await page.getByRole('button', { name: 'Trang sau', exact: true }).click();
-  await expect(page.locator('.qb-question-table tbody tr')).toHaveCount(15);
+  await expect(page.locator('.qb-question-table')).toHaveAttribute('data-page-row-count', '15');
   await page.locator('#qb-content-search').fill('dao ham cau 65');
   await expect(page.locator('.qb-question-table tbody tr')).toHaveCount(1);
   await expect(page.locator('.qb-question-table')).toContainText('65');

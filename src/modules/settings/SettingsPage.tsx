@@ -1,4 +1,8 @@
 import './settings.css';
+import { DiagnosticsSettings } from './DiagnosticsSettings';
+import { NAVIGATION } from '../../app/navigation';
+import { readStudioLayout, saveStudioLayout } from '../../app/studioLayout';
+import pkg from '../../../package.json';
 import { PerformanceSettings } from './PerformanceSettings';
 import { ClassificationPrompts } from '../question-bank/components/ClassificationPrompts';
 import { useState } from 'react';
@@ -34,13 +38,33 @@ export default function SettingsPage() {
   const mutate = useMutation();
   const push = useToasts((s) => s.push);
   const [incoming, setIncoming] = useState<Snapshot | null>(null);
-  const [section, setSection] = useState('ai');
+  const [section, setSection] = useState('general');
+  const layout = readStudioLayout(data.settings.moduleState?.studioLayout);
   const sections = [
     {
+      id: 'general',
+      label: 'Chung',
+      description: 'Khởi động và thông tin ứng dụng',
+      icon: Settings2,
+    },
+    {
       id: 'ai',
-      label: 'AI & API key',
+      label: 'Nhà cung cấp AI',
       description: 'Model, kết nối và danh sách key',
       icon: Sparkles,
+    },
+    { id: 'keys', label: 'API key', description: 'Khóa, thứ tự và kết nối', icon: ShieldCheck },
+    {
+      id: 'models',
+      label: 'Model',
+      description: 'Danh sách và thử structured output',
+      icon: Sparkles,
+    },
+    {
+      id: 'diagnostics',
+      label: 'Chẩn đoán',
+      description: 'Lỗi và báo cáo đã che key',
+      icon: HardDrive,
     },
     {
       id: 'prompts',
@@ -216,6 +240,57 @@ export default function SettingsPage() {
         <div className="settings-content">
           {section === 'prompts' && <ClassificationPrompts />}
           {section === 'performance' && <PerformanceSettings />}
+          {section === 'diagnostics' && <DiagnosticsSettings />}
+          {section === 'general' && (
+            <section className="panel">
+              <h2>Teacher Workspace · Academic Desktop Studio</h2>
+              <p>Phiên bản {pkg.version} · Tiếng Việt · Dữ liệu được lưu trên thiết bị.</p>
+              <label className="field">
+                Màn hình khi mở ứng dụng
+                <select
+                  aria-label="Màn hình khi mở ứng dụng"
+                  value={layout.startPage}
+                  onChange={(e) =>
+                    void saveStudioLayout({
+                      startPage: e.target.value as typeof layout.startPage,
+                    }).catch((error) => push(errorText(error), 'error'))
+                  }
+                >
+                  {NAVIGATION.map((n) => (
+                    <option key={n.id} value={n.id}>
+                      {n.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="button secondary"
+                onClick={() =>
+                  void saveStudioLayout({
+                    sidebarExpanded: false,
+                    libraryWidth: 206,
+                    readerWidth: 430,
+                  })
+                    .then(() => push('Đã khôi phục bố cục mặc định.'))
+                    .catch((e) => push(errorText(e), 'error'))
+                }
+              >
+                Khôi phục bố cục Studio
+              </button>
+              <p>Thay đổi bố cục không thay thế dữ liệu lịch hoặc ngân hàng câu hỏi.</p>
+            </section>
+          )}
+          {section === 'keys' && (
+            <section className="panel">
+              <ProviderSettings model={aiModel} compact view="keys" />
+            </section>
+          )}
+          {section === 'models' && (
+            <section className="panel">
+              <ProviderSettings model={aiModel} compact view="models" />
+            </section>
+          )}
+
           <div hidden={section !== 'updates'}>
             <UpdatePanel />
           </div>
@@ -230,7 +305,17 @@ export default function SettingsPage() {
               Dùng chung cho Phản biện đề và AI phân loại câu hỏi. Key được lưu trong vùng
               credential của Windows.
             </p>
-            <ProviderSettings model={aiModel} compact />
+            <h3>Gemini · adapter đang hoạt động</h3>
+            <p>
+              Hỗ trợ generateContent, danh sách model và thử structured output. Hiện chưa có adapter
+              nhà cung cấp khác để cấu hình.
+            </p>
+            <button className="button secondary" onClick={() => setSection('keys')}>
+              Quản lý API key
+            </button>{' '}
+            <button className="button secondary" onClick={() => setSection('models')}>
+              Quản lý model
+            </button>
           </section>
           <section hidden={section !== 'appearance'} className="panel">
             <h2>

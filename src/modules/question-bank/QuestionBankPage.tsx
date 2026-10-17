@@ -39,7 +39,14 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { errorText } from '../../app/store';
+import { errorText, useWorkspace } from '../../app/store';
+import { readStudioLayout, saveStudioLayout } from '../../app/studioLayout';
+import { useVirtualRows } from '../../components/useVirtualRows';
+import type {
+  CSSProperties,
+  PointerEvent as ReactPointerEvent,
+  KeyboardEvent as ReactKeyboardEvent,
+} from 'react';
 import { getDriver, isDesktop } from '../../database/driver';
 import type { BankSearchResult } from './database/search';
 import { Modal } from '../../components/Modal';
@@ -170,6 +177,57 @@ export default function QuestionBankPage() {
     window.addEventListener('keydown', shortcuts);
     return () => window.removeEventListener('keydown', shortcuts);
   }, []);
+  const layoutRaw = useWorkspace((s) => s.data.settings.moduleState?.studioLayout);
+  const [panelWidths, setPanelWidths] = useState(() => readStudioLayout(layoutRaw));
+  const studioRef = useRef<HTMLDivElement>(null);
+  function panelKeyboard(kind: 'libraryWidth' | 'readerWidth', event: ReactKeyboardEvent) {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    const minimum = kind === 'libraryWidth' ? 170 : 300,
+      maximum = kind === 'libraryWidth' ? 300 : 680;
+    const value = Math.min(
+      maximum,
+      Math.max(minimum, panelWidths[kind] + (event.key === 'ArrowRight' ? 20 : -20)),
+    );
+    setPanelWidths((old) => ({ ...old, [kind]: value }));
+    void saveStudioLayout({ [kind]: value }).catch((e) => toast(errorText(e), 'error'));
+  }
+  function panelPointer(
+    kind: 'libraryWidth' | 'readerWidth',
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const handle = event.currentTarget,
+      start = event.clientX,
+      initial = panelWidths[kind];
+    const minimum = kind === 'libraryWidth' ? 170 : 300,
+      maximum = kind === 'libraryWidth' ? 300 : 680;
+    let final = initial;
+    handle.setPointerCapture(event.pointerId);
+    const move = (e: PointerEvent) => {
+      final = Math.min(
+        maximum,
+        Math.max(minimum, initial + (kind === 'libraryWidth' ? 1 : -1) * (e.clientX - start)),
+      );
+      studioRef.current?.style.setProperty(
+        kind === 'libraryWidth' ? '--library-width' : '--reader-width',
+        `${final}px`,
+      );
+      handle.setAttribute('aria-valuenow', String(final));
+    };
+    const end = () => {
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+      setPanelWidths((old) => ({ ...old, [kind]: final }));
+      void saveStudioLayout({ [kind]: final }).catch((e) => toast(errorText(e), 'error'));
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  }
   const [zoom, setZoom] = useState(100);
   const reader = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -370,10 +428,19 @@ export default function QuestionBankPage() {
   );
   const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
-  const pageRows = (currentSearch?.pageIds ?? []).flatMap((id) => {
-    const q = questionById.get(id);
-    return q ? [q] : [];
-  });
+  const pageRows = useMemo(
+    () =>
+      (currentSearch?.pageIds ?? []).flatMap((id) => {
+        const q = questionById.get(id);
+        return q ? [q] : [];
+      }),
+    [currentSearch, questionById],
+  );
+  const virtual = useVirtualRows(pageRows);
+  const { scrollToIndex } = virtual;
+  useEffect(() => {
+    scrollToIndex(pageRows.findIndex((q) => q.id === selectedId));
+  }, [selectedId, pageRows, scrollToIndex]);
   const selected = visible.find((question) => question.id === selectedId) ?? null;
   const viewedIndex = visible.findIndex((q) => q.id === selectedId);
   function moveViewed(offset: number) {
@@ -792,6 +859,13 @@ export default function QuestionBankPage() {
 
   return (
     <div
+      ref={studioRef}
+      style={
+        {
+          '--library-width': `${panelWidths.libraryWidth}px`,
+          '--reader-width': `${panelWidths.readerWidth}px`,
+        } as CSSProperties
+      }
       className={`qb-page qb-studio ${!sidebarOpen ? 'sidebar-hidden' : ''} ${focusDetail ? 'detail-focused' : ''}`}
     >
       <header className="qb-studio-header">
@@ -915,6 +989,19 @@ export default function QuestionBankPage() {
           onSource={setSourceFilter}
         />
         <section className="qb-library-content" aria-label="Kho câu hỏi">
+          {sidebarOpen && (
+            <button
+              className="studio-resize-handle"
+              role="separator"
+              aria-label="Điều chỉnh độ rộng cây thư viện"
+              aria-orientation="vertical"
+              aria-valuemin={170}
+              aria-valuemax={300}
+              aria-valuenow={panelWidths.libraryWidth}
+              onPointerDown={(e) => panelPointer('libraryWidth', e)}
+              onKeyDown={(e) => panelKeyboard('libraryWidth', e)}
+            />
+          )}
           <div className="qb-library-toolbar">
             <div className="qb-library-context">
               <button
@@ -1046,8 +1133,17 @@ export default function QuestionBankPage() {
               Đang truy vấn ngân hàng…
             </p>
           )}
-          <div className="qb-table-wrap" aria-busy={!currentSearch && !searchError}>
-            <table className="qb-question-table">
+          <div
+            className="qb-table-wrap"
+            ref={virtual.containerRef}
+            onScroll={virtual.onScroll}
+            aria-busy={!currentSearch && !searchError}
+          >
+            <table
+              className="qb-question-table"
+              aria-rowcount={visible.length + 1}
+              data-page-row-count={pageRows.length}
+            >
               <colgroup>
                 <col style={{ width: 38 }} />
                 <col />
@@ -1061,14 +1157,21 @@ export default function QuestionBankPage() {
                 </tr>
               </thead>
               <tbody>
-                {pageRows.map((question, index) => (
+                {virtual.paddingTop > 0 && (
+                  <tr className="qb-virtual-spacer" aria-hidden="true">
+                    <td colSpan={3} style={{ height: virtual.paddingTop }} />
+                  </tr>
+                )}
+                {virtual.rows.map((question, index) => (
                   <tr
                     key={question.id}
+                    data-question-id={question.id}
+                    aria-rowindex={(safePage - 1) * PAGE_SIZE + virtual.start + index + 2}
                     className={`${selectedId === question.id ? 'active' : ''} ${checked.includes(question.id) ? 'in-tray' : ''}`}
                   >
                     <td>
                       <input
-                        aria-label={`Chọn ${question.displayId || question.classificationCode || `câu ${index + 1}`}`}
+                        aria-label={`Chọn ${question.displayId || question.classificationCode || `câu ${virtual.start + index + 1}`}`}
                         type="checkbox"
                         checked={checked.includes(question.id)}
                         onChange={(event) =>
@@ -1115,6 +1218,11 @@ export default function QuestionBankPage() {
                     </td>
                   </tr>
                 ))}
+                {virtual.paddingBottom > 0 && (
+                  <tr className="qb-virtual-spacer" aria-hidden="true">
+                    <td colSpan={3} style={{ height: virtual.paddingBottom }} />
+                  </tr>
+                )}
               </tbody>
             </table>
             {!pageRows.length && (
@@ -1167,6 +1275,17 @@ export default function QuestionBankPage() {
           </div>
         </section>
         <aside className="qb-question-detail" aria-label="Chi tiết câu hỏi">
+          <button
+            className="studio-resize-handle"
+            role="separator"
+            aria-label="Điều chỉnh độ rộng khung đọc"
+            aria-orientation="vertical"
+            aria-valuemin={300}
+            aria-valuemax={680}
+            aria-valuenow={panelWidths.readerWidth}
+            onPointerDown={(e) => panelPointer('readerWidth', e)}
+            onKeyDown={(e) => panelKeyboard('readerWidth', e)}
+          />
           {selected && !selected.deletedAt ? (
             <>
               <div className="qb-detail-toolbar">
