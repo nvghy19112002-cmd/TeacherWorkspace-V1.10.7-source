@@ -38,7 +38,10 @@ const entry = (id: string): HistoryEntry => ({
   inputSummary: '20 ký tự',
   result,
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 describe('LaTeX diagnostics and conservative fixes', () => {
   it('preserves a comment after a linebreak command', () => {
     const source = String.raw`text \\% do not edit \frac{1}{2}`;
@@ -189,10 +192,15 @@ describe('Gemini provider boundaries', () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
   it('normalizes network failure', async () => {
+    vi.useFakeTimers();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('secret endpoint')));
-    await expect(
-      geminiProvider.testConnection('fake-key-test-only', new AbortController().signal),
-    ).rejects.toThrow('Kiểm tra mạng');
+    const request = geminiProvider.testConnection(
+      'fake-key-test-only',
+      new AbortController().signal,
+    );
+    const check = expect(request).rejects.toThrow('Kiểm tra mạng');
+    await vi.advanceTimersByTimeAsync(15000);
+    await check;
   });
   it('handles cancellation without revealing raw errors', async () => {
     const abort = new AbortController();

@@ -38,8 +38,10 @@ test('settings groups, compact icon rail, bulk keys and dynamic model diagnostic
   ).toHaveCount(3);
   await page.getByRole('combobox', { name: 'Model dùng chung' }).selectOption('gemini-test-new');
   await page.getByRole('button', { name: 'Thử model', exact: true }).click();
-  await expect(page.locator('.key-diagnostic')).toContainText('HTTP 400');
-  await expect(page.locator('.key-diagnostic')).toContainText('unsupported configuration');
+  await expect(page.locator('.key-diagnostic')).toContainText('không được model hỗ trợ');
+  await page.getByText('Diagnostics', { exact: true }).click();
+  await expect(page.locator('.key-diagnostic-details')).toContainText('HTTP 400');
+  await expect(page.locator('.key-diagnostic-details')).toContainText('unsupported configuration');
   await page.getByRole('button', { name: 'Lưu model', exact: true }).click();
   await page.getByRole('button', { name: 'TeX Live Biên dịch và xem trước LaTeX' }).click();
   await expect(page.getByRole('heading', { name: 'TeX Live và xem trước câu hỏi' })).toBeVisible();

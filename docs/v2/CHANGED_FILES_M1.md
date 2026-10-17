@@ -1,0 +1,32 @@
+# File thay đổi M0/M1
+
+- `docs/v2/MASTER_PROMPT.md`
+- `docs/v2/MILESTONE_0.md`
+- `docs/v2/MILESTONE_1.md`
+- `src/modules/ai-tools/components/ProviderSettings.tsx`
+- `src/modules/ai-tools/domain/modelCapabilities.ts`
+- `src/modules/ai-tools/domain/usageCost.ts`
+- `src/modules/ai-tools/services/aiProvider.ts`
+- `src/modules/ai-tools/services/credentials.ts`
+- `src/modules/ai-tools/services/geminiDiagnostics.ts`
+- `src/modules/ai-tools/services/requestManager.ts`
+- `src/modules/question-bank/components/AiIdScan.tsx`
+- `src/modules/question-bank/components/ClassificationPrompts.tsx`
+- `src/modules/question-bank/domain/classification.ts`
+- `src/modules/question-bank/domain/classificationPrompts.ts`
+- `src/modules/question-bank/domain/curriculumRetrieval.ts`
+- `src/modules/question-bank/domain/scanQueue.ts`
+- `src/modules/question-bank/services/classificationProvider.ts`
+- `src/modules/question-bank/services/scanSession.ts`
+- `src/modules/settings/SettingsPage.tsx`
+- `src/services/moduleSettings.ts`
+- `tests/ai-model-catalog.test.ts`
+- `tests/ai-request-manager.test.ts`
+- `tests/ai-tools.test.ts`
+- `tests/classification-prompts.test.ts`
+- `tests/e2e/ai-reliability.spec.ts`
+- `tests/e2e/settings-redesign.spec.ts`
+- `tests/key-selection.test.ts`
+- `tests/question-ai-provider.test.ts`
+- `tests/scan-checkpoint-sqlite.test.ts`
+- `tests/scan-queue.test.ts`

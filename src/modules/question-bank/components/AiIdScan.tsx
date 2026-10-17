@@ -16,26 +16,30 @@ import {
   resultPathError,
 } from '../domain/classificationContext';
 import { curriculumPath } from '../domain/curriculum';
-import { runScanQueue, type ScanQueueRow } from '../domain/scanQueue';
+import { runScanQueue, restoreScanJob, resumableRow, type ScanQueueRow } from '../domain/scanQueue';
 import { classificationResultSchema } from '../domain/classification';
+import { activeClassificationPrompt, promptFingerprint } from '../domain/classificationPrompts';
+import { saveModuleSetting } from '../../../services/moduleSettings';
+import { AiRequestError } from '../../ai-tools/services/requestManager';
 import {
   LEVEL_LABELS,
   type Question,
   type ClassificationRun,
   type BankSnapshot,
 } from '../domain/model';
-import {
-  classifyQuestionOnline,
-  ClassificationRequestError,
-} from '../services/classificationProvider';
+import { classifyQuestionOnline } from '../services/classificationProvider';
 import { useQuestionBank } from '../store';
+import { beginScanSession, finishScanSession } from '../services/scanSession';
 import './ai-id-scan.css';
 const statusNames = {
   pending: 'Chờ quét',
   running: 'Đang phân tích',
-  done: 'Đã lưu đề xuất',
+  completed: 'Đã lưu đề xuất',
+  retrying: 'Đang chờ thử lại',
+  paused: 'Đã tạm dừng',
+  cancelled: 'Đã hủy yêu cầu',
+  needs_review: 'Cần giáo viên kiểm tra',
   failed: 'Lỗi',
-  skipped: 'Bỏ qua',
 };
 function Suggestion({
   run,
@@ -139,9 +143,14 @@ function Suggestion({
         {run.accepted ? 'Đã áp dụng' : stale ? 'Cần quét lại' : 'Chờ giáo viên duyệt'}
       </summary>
       <small>
-        {run.model} · {new Date(run.createdAt).toLocaleString('vi-VN')} ·{' '}
-        {Math.round(result.confidence * 100)}% do AI tự đánh giá
+        {run.model} · {raw.__promptVersion || 'Prompt cũ chưa có phiên bản'} ·{' '}
+        {new Date(run.createdAt).toLocaleString('vi-VN')} · {Math.round(result.confidence * 100)}%
+        do AI tự đánh giá
       </small>
+      <p className="muted">
+        Token: {raw.__usage?.totalTokenCount ?? 'không được provider báo cáo'} · Chi phí: chưa có
+        đơn giá để tính.
+      </p>
       <div className="qb-ai-review-grid">
         <section>
           <h4>Câu hỏi đang đối chiếu</h4>
@@ -302,12 +311,17 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
     busy = useQuestionBank((s) => s.busy);
   const settings = useWorkspace((s) => s.data.settings);
   const model = readAiState(settings.moduleState?.aiTools).model;
+  const prompt = activeClassificationPrompt(settings.moduleState?.classificationPrompts);
+  const restored = restoreScanJob(settings.moduleState?.classificationJob);
+  const selectionIds = new Set(questions.map((q) => q.id));
+  const matchingJob =
+    restored && restored.rows.every((r) => selectionIds.has(r.id)) ? restored : null;
   const [running, setRunning] = useState(false),
-    [started, setStarted] = useState(false),
+    [started, setStarted] = useState(Boolean(matchingJob)),
     [error, setError] = useState('');
-  const [scopeId, setScopeId] = useState(''),
+  const [scopeId, setScopeId] = useState(matchingJob?.scopeId ?? ''),
     [force, setForce] = useState(false),
-    [rows, setRows] = useState<ScanQueueRow[]>([]);
+    [rows, setRows] = useState<ScanQueueRow[]>(matchingJob?.rows ?? []);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [dirtyRuns, setDirtyRuns] = useState<Set<string>>(new Set());
   const [batchReport, setBatchReport] = useState<Pick<
@@ -344,7 +358,7 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
       });
   const page = Math.min(historyPage, Math.max(0, Math.ceil(history.length / 20) - 1));
   const visibleHistory = history.slice(page * 20, page * 20 + 20);
-  const failed = rows.filter((r) => r.status === 'failed' || r.status === 'pending');
+  const failed = rows.filter(resumableRow);
   async function start(retry = false, explicitConsent = false) {
     if (controller.current || busy || !model) return;
     if (
@@ -359,16 +373,29 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
     setStarted(true);
     setOptionsOpen(false);
     setBatchReport(null);
-    const abort = new AbortController();
+    const abort = beginScanSession();
+    if (!abort) {
+      setError('Lượt quét trước đang lưu tiến trình dừng. Hãy thử lại sau vài giây.');
+      return;
+    }
     controller.current = abort;
     setRunning(true);
     setError('');
     const targets = retry ? failed.map((r) => r.id) : questions.map((q) => q.id);
+    if (targets.length > 1000) {
+      controller.current = null;
+      finishScanSession(abort);
+      setRunning(false);
+      setError('Mỗi lô tối đa 1.000 câu. Hãy chia nhỏ lựa chọn.');
+      return;
+    }
+    const jobId = crypto.randomUUID();
+    const retained = rows.filter((r) => !targets.includes(r.id));
     try {
       const completed = await runScanQueue(
         targets,
         abort.signal,
-        async (id) => {
+        async (id, onRetry) => {
           const s = useQuestionBank.getState().data;
           const q = s.questions.find((q) => q.id === id);
           if (!q) return 'Câu không còn trong kho.';
@@ -387,6 +414,7 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                   v.__sourceUpdatedAt === metadata.__sourceUpdatedAt &&
                   v.__contextFingerprint === metadata.__contextFingerprint &&
                   v.__scopeId === scopeId &&
+                  v.__promptFingerprint === promptFingerprint(prompt) &&
                   classificationResultSchema.safeParse(v).success &&
                   !resultPathError(s, v) &&
                   v.dataCheck === 'valid'
@@ -397,8 +425,11 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
             });
             if (existing) return 'Đã có đề xuất hiện hành chờ duyệt; không gọi API lại.';
           }
-          const response = await classifyQuestionOnline(s, q, abort.signal, scopeId);
-          if (abort.signal.aborted) return;
+          const response = await classifyQuestionOnline(s, q, abort.signal, scopeId, {
+            onRetry,
+            prompt,
+          });
+          abort.signal.throwIfAborted();
           await useQuestionBank.getState().commit((latest) => ({
             ...latest,
             classificationRuns: [
@@ -408,23 +439,59 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                 questionId: q.id,
                 provider: 'gemini',
                 model: response.model,
-                resultJson: JSON.stringify({ ...response.result, ...metadata }),
+                resultJson: JSON.stringify({
+                  ...response.result,
+                  ...metadata,
+                  __promptVersion: response.prompt.version,
+                  __promptId: response.prompt.id,
+                  __promptFingerprint: response.prompt.fingerprint,
+                  __usage: response.usage,
+                  __usageRequests: response.usageRequests,
+                  __retrieval: response.retrieval,
+                  __cost: response.cost,
+                }),
                 accepted: false,
                 createdAt: new Date().toISOString(),
               },
             ],
           }));
+          return {
+            needsReview:
+              response.result.confidence < 0.65 ||
+              response.result.dataCheck !== 'valid' ||
+              response.result.alignment !== 'direct' ||
+              response.result.answerCheck !== 'correct' ||
+              !s.learningOutcomes.length ||
+              q.hasImage,
+          };
         },
-        (next) => setRows((old) => [...old.filter((r) => !targets.includes(r.id)), ...next]),
-        (cause) => cause instanceof ClassificationRequestError && cause.fatalBatch,
+        async (next) => {
+          const merged = [...retained, ...next];
+          await saveModuleSetting(
+            'classificationJob',
+            JSON.stringify({
+              version: 1,
+              id: jobId,
+              model,
+              scopeId,
+              promptFingerprint: promptFingerprint(prompt),
+              updatedAt: new Date().toISOString(),
+              rows: merged,
+            }),
+          );
+          setRows(merged);
+        },
+        (cause) => cause instanceof AiRequestError && cause.fatalBatch,
+        rows,
       );
-      if (completed.some((r) => r.status === 'done')) setOptionsOpen(false);
+      if (completed.some((r) => r.status === 'completed')) setOptionsOpen(false);
       const firstFailure = completed.find((r) => r.status === 'failed');
       if (firstFailure) setError(firstFailure.message);
     } catch (e) {
       if (!abort.signal.aborted) setError(errorText(e));
     } finally {
       controller.current = null;
+      finishScanSession(abort);
       setRunning(false);
     }
   }
@@ -554,11 +621,18 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
         {started && (
           <>
             <p role="status">
-              Đã lưu {rows.filter((r) => r.status === 'done').length} · Lỗi{' '}
-              {rows.filter((r) => r.status === 'failed').length} · Bỏ qua{' '}
-              {rows.filter((r) => r.status === 'skipped').length} · Chờ{' '}
-              {rows.filter((r) => r.status === 'pending').length}
-              {running ? ' · Đang quét…' : ''}
+              Đã lưu{' '}
+              {
+                rows.filter(
+                  (r) => r.status === 'completed' || (r.status === 'needs_review' && !r.skipped),
+                ).length
+              }{' '}
+              · Lỗi {rows.filter((r) => r.status === 'failed').length} · Bỏ qua{' '}
+              {rows.filter((r) => r.skipped).length} · Chờ{' '}
+              {rows.filter((r) => ['pending', 'paused', 'cancelled'].includes(r.status)).length}
+              {running
+                ? ` · ${rows.find((r) => r.status === 'retrying')?.message || 'Đang quét…'}`
+                : ''}
             </p>
             {error && <p role="alert">{error}</p>}
             {batchReport && (
@@ -595,6 +669,12 @@ export function AiIdScan({ questions, onClose }: { questions: Question[]; onClos
                         {statusNames[r.status]}
                       </strong>{' '}
                       {r.message}
+                      {r.diagnostic && (
+                        <details>
+                          <summary>Diagnostics</summary>
+                          <pre>{r.diagnostic}</pre>
+                        </details>
+                      )}
                     </li>
                   ))}
                 </ul>

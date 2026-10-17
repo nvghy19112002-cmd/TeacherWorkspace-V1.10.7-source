@@ -8,6 +8,9 @@ import './providerSettings.css';
 import { testGeminiModel } from '../services/aiProvider';
 import { geminiProvider } from '../services/aiProvider';
 import { saveAiState } from '../services/state';
+import { AiRequestError } from '../services/requestManager';
+import { saveModuleSetting } from '../../../services/moduleSettings';
+import { readModelChecks, verifiedModel } from '../domain/modelCapabilities';
 import { modelNameSchema } from '../domain/model';
 import { readKeyPool, saveKeyPool, type KeyMeta, type KeyPool } from '../domain/keyPool';
 
@@ -27,6 +30,7 @@ function statusFromError(error: unknown): KeyMeta['status'] {
 }
 
 export function ProviderSettings({ model, compact = false }: { model: string; compact?: boolean }) {
+  const checksRaw = useWorkspace((s) => s.data.settings.moduleState?.aiModelChecks);
   const raw = useWorkspace((state) => state.data.settings.moduleState?.aiKeyPool);
   const pool = useMemo(() => readKeyPool(raw), [raw]);
   const [draft, setDraft] = useState('');
@@ -36,6 +40,7 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
   const [models, setModels] = useState<string[]>([]);
   const [bulk, setBulk] = useState('');
   const [diagnostic, setDiagnostic] = useState('');
+  const [diagnosticDetails, setDiagnosticDetails] = useState('');
   const [busyModel, setBusyModel] = useState(false);
   const [catalogKey, setCatalogKey] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -168,6 +173,7 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
     } catch (error) {
       if (!committed) await Promise.all(stored.map((id) => deleteKey(id).catch(() => undefined)));
       setDiagnostic(errorText(error));
+      setDiagnosticDetails(error instanceof AiRequestError ? error.diagnostic : '');
     } finally {
       setBusyId(null);
     }
@@ -194,13 +200,48 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
     }
     setBusyModel(true);
     setDiagnostic('Đang thử model với một yêu cầu JSON ngắn…');
+    setDiagnosticDetails('');
     controller.current?.abort();
     controller.current = new AbortController();
     try {
+      await saveModuleSetting(
+        'aiModelChecks',
+        JSON.stringify(
+          [
+            ...readModelChecks(
+              useWorkspace.getState().data.settings.moduleState?.aiModelChecks,
+            ).filter((c) => !(c.model === name.trim() && c.keyId === meta.id)),
+            {
+              model: name.trim(),
+              keyId: meta.id,
+              checkedAt: new Date().toISOString(),
+              structuredOutput: false,
+            },
+          ].slice(-100),
+        ),
+      );
       await testGeminiModel(name.trim(), await readKey(meta.id), controller.current.signal);
+      const current = useWorkspace.getState().data.settings.moduleState?.aiModelChecks;
+      await saveModuleSetting(
+        'aiModelChecks',
+        JSON.stringify(
+          [
+            ...readModelChecks(current).filter(
+              (c) => !(c.model === name.trim() && c.keyId === meta.id),
+            ),
+            {
+              model: name.trim(),
+              keyId: meta.id,
+              checkedAt: new Date().toISOString(),
+              structuredOutput: true,
+            },
+          ].slice(-100),
+        ),
+      );
       setDiagnostic(`${name.trim()}: gọi thành công và nhận được JSON hợp lệ.`);
     } catch (error) {
       setDiagnostic(errorText(error));
+      setDiagnosticDetails(error instanceof AiRequestError ? error.diagnostic : '');
     } finally {
       setBusyModel(false);
     }
@@ -266,6 +307,7 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
         ),
       }));
       setDiagnostic(errorText(error));
+      setDiagnosticDetails(error instanceof AiRequestError ? error.diagnostic : '');
       toast(errorText(error), 'error');
     } finally {
       setBusyId(null);
@@ -425,16 +467,10 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
           </div>
         ))}
       </div>
-      <label className="check-row">
-        <input
-          type="checkbox"
-          checked={pool.automatic}
-          onChange={(event) =>
-            void update((current) => ({ ...current, automatic: event.target.checked }))
-          }
-        />
-        Tự chuyển sang key tiếp theo khi provider báo hết hạn mức
-      </label>
+      <p className="muted">
+        Khi provider giới hạn tần suất hoặc hết quota, hệ thống chờ hoặc dừng lô và giữ tiến trình.
+        Không tự đổi key để né hạn mức.
+      </p>
       <label className="key-rotation">
         Cách dùng key
         <select
@@ -465,7 +501,10 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
             )}
             {models.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {item} ·{' '}
+                {verifiedModel(checksRaw, item, pool.activeId ?? '')
+                  ? 'đã thử JSON'
+                  : 'chưa thử structured output'}
               </option>
             ))}
           </select>
@@ -495,6 +534,7 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
                 toast('Đã lưu model.');
               } catch (error) {
                 setDiagnostic(errorText(error));
+                setDiagnosticDetails(error instanceof AiRequestError ? error.diagnostic : '');
               }
             })()
           }
@@ -514,6 +554,12 @@ export function ProviderSettings({ model, compact = false }: { model: string; co
           onChange={(e) => setName(e.target.value)}
         />
       </details>
+      {diagnosticDetails && (
+        <details>
+          <summary>Diagnostics</summary>
+          <pre className="key-diagnostic-details">{diagnosticDetails}</pre>
+        </details>
+      )}
       {diagnostic && (
         <p className="key-diagnostic" role="status">
           {diagnostic}

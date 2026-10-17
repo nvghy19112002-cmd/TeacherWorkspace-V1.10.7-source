@@ -1,3 +1,4 @@
+import { managedRequest } from './requestManager';
 import { geminiHttpError } from './geminiDiagnostics';
 import { z } from 'zod';
 import { modelNameSchema, reportSchema, type Report } from '../domain/model';
@@ -34,28 +35,30 @@ async function requestJson(
   model = '',
 ): Promise<unknown> {
   if (!key) throw new Error('Chưa có API key. Hãy mở tab Provider.');
-  try {
-    const response = await fetch(url, {
-      method: body ? 'POST' : 'GET',
-      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.any([signal, AbortSignal.timeout(120000)]),
-    });
-    if (!response.ok) throw await geminiHttpError(response, key, model);
-    const text = await response.text();
-    if (text.length > 2000000) throw new Error('Phản hồi AI quá lớn. Hãy chia nhỏ tài liệu.');
-    try {
-      return JSON.parse(redact(text, key)) as unknown;
-    } catch {
-      throw new Error('Dịch vụ trả về dữ liệu không hợp lệ.');
-    }
-  } catch (error) {
-    if (signal.aborted) throw new Error('Đã hủy yêu cầu.');
-    if (error instanceof DOMException && error.name === 'TimeoutError')
-      throw new Error('AI chưa phản hồi sau 120 giây. Hãy chia nhỏ tài liệu.');
-    if (error instanceof TypeError) throw new Error('Không kết nối được AI. Kiểm tra mạng.');
-    throw error;
-  }
+  return managedRequest(
+    async () => {
+      try {
+        const response = await fetch(url, {
+          method: body ? 'POST' : 'GET',
+          headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
+          body: body ? JSON.stringify(body) : undefined,
+          signal: AbortSignal.any([signal, AbortSignal.timeout(120000)]),
+        });
+        if (!response.ok) throw await geminiHttpError(response, key, model);
+        const text = await response.text();
+        if (text.length > 2000000) throw new Error('Phản hồi AI quá lớn. Hãy chia nhỏ tài liệu.');
+        try {
+          return JSON.parse(redact(text, key)) as unknown;
+        } catch {
+          throw new Error('Dịch vụ trả về dữ liệu không hợp lệ.');
+        }
+      } catch (error) {
+        if (signal.aborted) throw new Error('Đã hủy yêu cầu.');
+        throw error;
+      }
+    },
+    { signal },
+  );
 }
 const responseSchema = z.object({
   candidates: z

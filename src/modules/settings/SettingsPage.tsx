@@ -1,4 +1,5 @@
 import './settings.css';
+import { ClassificationPrompts } from '../question-bank/components/ClassificationPrompts';
 import { useState } from 'react';
 import { UpdatePanel } from '../updates/UpdatePanel';
 import {
@@ -38,6 +39,12 @@ export default function SettingsPage() {
       id: 'ai',
       label: 'AI & API key',
       description: 'Model, kết nối và danh sách key',
+      icon: Sparkles,
+    },
+    {
+      id: 'prompts',
+      label: 'Prompt phân loại',
+      description: 'Phiên bản, thử và đối chiếu',
       icon: Sparkles,
     },
     { id: 'tex', label: 'TeX Live', description: 'Biên dịch và xem trước LaTeX', icon: Code2 },
@@ -183,6 +190,7 @@ export default function SettingsPage() {
           ))}
         </nav>
         <div className="settings-content">
+          {section === 'prompts' && <ClassificationPrompts />}
           <div hidden={section !== 'updates'}>
             <UpdatePanel />
           </div>

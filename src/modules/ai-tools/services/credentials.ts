@@ -48,16 +48,8 @@ export async function withPreferredKeys<T>(
     if (!key) throw new Error('Chưa có API key đang bật.');
     return { result: await run(key), key };
   }
-  for (let i = 0; i < metas.length; i++) {
-    signal.throwIfAborted();
-    const key = await readKey(metas[i].id);
-    if (!key) throw new Error('Không đọc được API key đã chọn.');
-    try {
-      return { result: await run(key), key };
-    } catch (error) {
-      const quota = error instanceof Error && 'status' in error && error.status === 429;
-      if (!quota || !pool.automatic || i === metas.length - 1 || signal.aborted) throw error;
-    }
-  }
-  throw new Error('Không có API key khả dụng.');
+  signal.throwIfAborted();
+  const key = await readKey(metas[0].id);
+  if (!key) throw new Error('Không đọc được API key đã chọn.');
+  return { result: await run(key), key };
 }

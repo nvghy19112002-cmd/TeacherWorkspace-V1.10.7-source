@@ -41,20 +41,18 @@ it('preserves useful provider details and redacts credentials', async () => {
     'secret-key-catalog',
     'gemini-test',
   );
-  expect(error.message).toContain('HTTP 400');
-  expect(error.message).toContain('unsupported temperature');
+  expect(error.diagnostic).toContain('HTTP 400');
+  expect(error.diagnostic).toContain('unsupported temperature');
   expect(error.message).not.toContain('secret-key-catalog');
 });
 it('probes JSON generation without forcing unsupported sampling parameters', async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          candidates: [{ finishReason: 'STOP', content: { parts: [{ text: '{"ok":true}' }] } }],
-        }),
-      ),
-    );
+  const fetcher = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        candidates: [{ finishReason: 'STOP', content: { parts: [{ text: '{"ok":true}' }] } }],
+      }),
+    ),
+  );
   vi.stubGlobal('fetch', fetcher);
   await testGeminiModel('gemini-test', 'fake-key-model', new AbortController().signal);
   const body = JSON.parse(fetcher.mock.calls[0][1].body);

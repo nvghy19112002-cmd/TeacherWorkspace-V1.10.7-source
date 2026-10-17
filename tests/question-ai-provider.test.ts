@@ -7,9 +7,12 @@ import {
 import { emptyBankSnapshot } from '../src/modules/question-bank/domain/model';
 import { parseExTest, parsedToQuestion } from '../src/modules/question-bank/domain/parser';
 
+const configured = vi.hoisted(() => ({ moduleState: {} as Record<string, string> }));
 vi.mock('../src/app/store', () => ({
   errorText: (error: unknown) => (error instanceof Error ? error.message : String(error)),
-  useWorkspace: { getState: () => ({ data: { settings: { moduleState: {} } } }) },
+  useWorkspace: {
+    getState: () => ({ data: { settings: { moduleState: configured.moduleState } } }),
+  },
 }));
 vi.mock('../src/modules/ai-tools/services/state', () => ({
   readAiState: () => ({ model: 'test-model' }),
@@ -31,6 +34,7 @@ import {
   supportedJsonSchema,
 } from '../src/modules/question-bank/services/classificationProvider';
 afterEach(() => {
+  configured.moduleState = {};
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -144,8 +148,8 @@ it('retries transient server errors with bounded backoff and respects cancellati
   const abort = new AbortController();
   const pending = classifyQuestionOnline(snapshot(), q, abort.signal);
   const check = expect(pending).rejects.toThrow();
-  await vi.advanceTimersByTimeAsync(2500);
-  expect(fetch).toHaveBeenCalledTimes(3);
+  await vi.advanceTimersByTimeAsync(15000);
+  expect(fetch).toHaveBeenCalledTimes(4);
   await check;
   fetch.mockClear();
   const again = new AbortController();
@@ -155,4 +159,125 @@ it('retries transient server errors with bounded backoff and respects cancellati
   again.abort();
   await cancelled;
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+function uncertainProposal() {
+  return {
+    proposedClassificationCode: '',
+    grade: '10',
+    domain: 'D',
+    chapterId: null,
+    lessonId: null,
+    formId: null,
+    level: 'N',
+    primaryLearningOutcomeId: null,
+    secondaryLearningOutcomeIds: [],
+    alignment: 'insufficient_data',
+    confidence: 0.2,
+    reasoningSummary: 'Cần giáo viên kiểm tra',
+    evidence: [],
+    independentAnswer: '',
+    answerCheck: 'missing',
+    dataCheck: 'insufficient',
+    warnings: ['Thiếu dữ kiện'],
+    alternativeClassifications: [],
+  };
+}
+const proposalResponse = (result: unknown) => ({
+  ok: true,
+  text: async () =>
+    JSON.stringify({
+      candidates: [
+        { finishReason: 'STOP', content: { parts: [{ text: JSON.stringify(result) }] } },
+      ],
+      usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 50, totalTokenCount: 150 },
+    }),
+});
+it.each([400, 401, 403, 404, 429])(
+  'HTTP %s neither rotates credentials nor repeats a permanent failure',
+  async (status) => {
+    const fetch = vi.fn().mockResolvedValue({ ok: false, status });
+    vi.stubGlobal('fetch', fetch);
+    await expect(
+      classifyQuestionOnline(
+        snapshot(),
+        parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]),
+        new AbortController().signal,
+      ),
+    ).rejects.toMatchObject({ status, fatalBatch: true });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  },
+);
+it('rejects unknown database IDs and invalid structured output without saving a guessed result', async () => {
+  const q = parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]);
+  const original = JSON.stringify(q);
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(proposalResponse({ ...uncertainProposal(), formId: 'invented-form' }))
+    .mockResolvedValueOnce(proposalResponse({ arbitrary: true }));
+  vi.stubGlobal('fetch', fetch);
+  await expect(classifyQuestionOnline(snapshot(), q, new AbortController().signal)).rejects.toThrow(
+    'ngoài danh mục',
+  );
+  await expect(classifyQuestionOnline(snapshot(), q, new AbortController().signal)).rejects.toThrow(
+    'schema',
+  );
+  expect(fetch).toHaveBeenCalledTimes(2);
+  expect(JSON.stringify(q)).toBe(original);
+});
+it('uses only an explicitly configured and key-verified fallback after bounded service retries', async () => {
+  vi.useFakeTimers();
+  configured.moduleState = {
+    classificationFallbacks: JSON.stringify(['fallback-model']),
+    aiModelChecks: JSON.stringify([
+      {
+        model: 'fallback-model',
+        keyId: 'chosen',
+        checkedAt: new Date().toISOString(),
+        structuredOutput: true,
+      },
+    ]),
+  };
+  const fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+  fetch
+    .mockResolvedValueOnce({ ok: false, status: 503 })
+    .mockResolvedValueOnce({ ok: false, status: 503 })
+    .mockResolvedValueOnce({ ok: false, status: 503 })
+    .mockResolvedValueOnce({ ok: false, status: 503 })
+    .mockResolvedValueOnce(proposalResponse(uncertainProposal()));
+  vi.stubGlobal('fetch', fetch);
+  const pending = classifyQuestionOnline(
+    snapshot(),
+    parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]),
+    new AbortController().signal,
+  );
+  await vi.advanceTimersByTimeAsync(15000);
+  expect((await pending).model).toBe('fallback-model');
+  expect(fetch).toHaveBeenCalledTimes(5);
+  expect(fetch.mock.calls[4][0]).toContain('fallback-model');
+  expect(new Set(fetch.mock.calls.map((call) => call[1].headers['x-goog-api-key'])).size).toBe(1);
+});
+it('does not use a fallback whose structured output was checked with another key', async () => {
+  vi.useFakeTimers();
+  configured.moduleState = {
+    classificationFallbacks: JSON.stringify(['fallback-model']),
+    aiModelChecks: JSON.stringify([
+      {
+        model: 'fallback-model',
+        keyId: 'other',
+        checkedAt: new Date().toISOString(),
+        structuredOutput: true,
+      },
+    ]),
+  };
+  const fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+  vi.stubGlobal('fetch', fetch);
+  const pending = classifyQuestionOnline(
+    snapshot(),
+    parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]),
+    new AbortController().signal,
+  );
+  const rejected = expect(pending).rejects.toMatchObject({ status: 503 });
+  await vi.advanceTimersByTimeAsync(15000);
+  await rejected;
+  expect(fetch).toHaveBeenCalledTimes(4);
 });

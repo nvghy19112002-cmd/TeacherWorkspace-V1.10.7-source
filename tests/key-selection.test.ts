@@ -34,7 +34,7 @@ it('uses round robin for real AI Tools requests', async () => {
   await withPreferredKeys(run, new AbortController().signal);
   expect(run.mock.calls.map((c) => c[0])).toEqual(['fake-rotate-key-one', 'fake-rotate-key-two']);
 });
-it('switches on quota errors but stops on model or configuration errors', async () => {
+it('stops on quota errors without switching credentials, and stops on invalid models', async () => {
   pool(['quota-one', 'quota-two']);
   await storeKey('fake-quota-key-one', 'quota-one');
   await storeKey('fake-quota-key-two', 'quota-two');
@@ -42,8 +42,8 @@ it('switches on quota errors but stops on model or configuration errors', async 
     .fn()
     .mockRejectedValueOnce(new GeminiHttpError('quota', 429))
     .mockResolvedValueOnce('ok');
-  expect((await withPreferredKeys(run, new AbortController().signal)).result).toBe('ok');
-  expect(run).toHaveBeenCalledTimes(2);
+  await expect(withPreferredKeys(run, new AbortController().signal)).rejects.toThrow('quota');
+  expect(run).toHaveBeenCalledTimes(1);
   const invalid = vi.fn().mockRejectedValue(new GeminiHttpError('bad model', 404));
   await expect(withPreferredKeys(invalid, new AbortController().signal)).rejects.toThrow(
     'bad model',
