@@ -9,12 +9,25 @@ import { queuedTexCompile } from '../services/texCompileQueue';
 
 export function TikzPreview({ source }: { source: string }) {
   const host = useRef<HTMLSpanElement>(null);
-  const [image, setImage] = useState<FigureImage | null>(null);
-  const [message, setMessage] = useState(
-    isDesktop
+  const [revision, setRevision] = useState(0);
+  const [preview, setPreview] = useState<{
+    source: string;
+    revision: number;
+    image: FigureImage | null;
+    message: string;
+  } | null>(null);
+  const current = preview?.source === source && preview.revision === revision ? preview : null;
+  const image = current?.image;
+  const message =
+    current?.message ??
+    (isDesktop
       ? 'Đang dựng hình TikZ…'
-      : 'Hình TikZ hiển thị tự động trong app Windows có TeX Live.',
-  );
+      : 'Hình TikZ hiển thị tự động trong app Windows có TeX Live.');
+  useEffect(() => {
+    const reload = () => setRevision((value) => value + 1);
+    window.addEventListener('teacher-preview-cache-cleared', reload);
+    return () => window.removeEventListener('teacher-preview-cache-cleared', reload);
+  }, []);
   useEffect(() => {
     if (!isDesktop) return;
     const abort = new AbortController();
@@ -45,10 +58,15 @@ export function TikzPreview({ source }: { source: string }) {
             const { pdfFigure } = await import('../services/pdfFigure');
             const rendered = await pdfFigure(result.pdf, abort.signal, key);
             abort.signal.throwIfAborted();
-            setImage(rendered);
-            setMessage('Hình TikZ · có lưu đệm trong phiên làm việc');
+            setPreview({
+              source,
+              revision,
+              image: rendered,
+              message: 'Hình TikZ · kết quả biên dịch nguồn hiện tại',
+            });
           } catch (error) {
-            if (!abort.signal.aborted) setMessage(errorText(error));
+            if (!abort.signal.aborted)
+              setPreview({ source, revision, image: null, message: errorText(error) });
           }
         })();
       }, 250);
@@ -69,7 +87,7 @@ export function TikzPreview({ source }: { source: string }) {
       window.clearTimeout(timer);
       observer?.disconnect();
     };
-  }, [source]);
+  }, [source, revision]);
   return (
     <span className="qb-tikz-inline" ref={host}>
       {image ? (

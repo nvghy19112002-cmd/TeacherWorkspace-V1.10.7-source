@@ -9,6 +9,15 @@ export interface FigureImage {
 }
 const cache = new Map<string, FigureImage>();
 let bytes = 0;
+let cacheGeneration = 0;
+export function figureCacheStats() {
+  return { entries: cache.size, bytes };
+}
+export function clearFigureCache() {
+  cache.clear();
+  bytes = 0;
+  cacheGeneration++;
+}
 
 /** Draw only the cropped figure page, without a browser PDF frame or toolbar. */
 export async function pdfFigure(
@@ -17,6 +26,14 @@ export async function pdfFigure(
   key = '',
 ): Promise<FigureImage> {
   signal.throwIfAborted();
+  const generation = cacheGeneration;
+  const data = new Uint8Array(pdf);
+  // A reused caller label must never return an image of different PDF bytes.
+  if (key && globalThis.crypto?.subtle) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+    key += ':' + [...digest].map((n) => n.toString(16).padStart(2, '0')).join('');
+  } else key = '';
+  signal.throwIfAborted();
   if (key && cache.has(key)) {
     const image = cache.get(key)!;
     cache.delete(key);
@@ -24,7 +41,7 @@ export async function pdfFigure(
     return image;
   }
   const loading = getDocument({
-    data: new Uint8Array(pdf),
+    data,
     useSystemFonts: true,
   });
   const cancel = () => {
@@ -36,6 +53,13 @@ export async function pdfFigure(
     signal.throwIfAborted();
     const page = await doc.getPage(1);
     const natural = page.getViewport({ scale: 1 });
+    if (
+      !Number.isFinite(natural.width) ||
+      !Number.isFinite(natural.height) ||
+      natural.width <= 0 ||
+      natural.height <= 0
+    )
+      throw new Error('Trang PDF không có kích thước hợp lệ.');
     const width = Math.min(680, Math.max(140, natural.width * 1.6));
     const height = (width * natural.height) / natural.width;
     const quality = Math.min(2, Math.sqrt(4_000_000 / (width * height)));
@@ -56,7 +80,8 @@ export async function pdfFigure(
     const image = { url: canvas.toDataURL('image/png'), width, height };
     canvas.width = 0;
     canvas.height = 0;
-    if (key && image.url.length < 2_000_000) {
+    if (key && generation === cacheGeneration && image.url.length < 2_000_000) {
+      bytes -= cache.get(key)?.url.length ?? 0;
       cache.set(key, image);
       bytes += image.url.length;
       while (cache.size > 24 || bytes > 12_000_000) {
@@ -68,6 +93,6 @@ export async function pdfFigure(
     return image;
   } finally {
     signal.removeEventListener('abort', cancel);
-    await loading.destroy();
+    await loading.destroy().catch(() => undefined);
   }
 }

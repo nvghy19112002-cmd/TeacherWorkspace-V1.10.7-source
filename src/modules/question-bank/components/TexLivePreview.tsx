@@ -75,6 +75,17 @@ export function TexLivePreview({
     bytes.current = null;
     setPdfUrl('');
   }, []);
+  const inputIdentity = JSON.stringify([source, items]);
+  const previousInput = useRef(inputIdentity);
+  useEffect(() => {
+    if (previousInput.current === inputIdentity) return;
+    previousInput.current = inputIdentity;
+    compileAbort.current?.abort();
+    clearPdf();
+    setOrdered(items ?? []);
+    setLog('');
+    setMessage('Nguồn câu đã thay đổi. Bấm Biên dịch xem trước để tạo PDF mới.');
+  }, [inputIdentity, items, clearPdf]);
   function move(index: number, offset: number) {
     if (index + offset < 0 || index + offset >= ordered.length) return;
     clearPdf();
@@ -86,6 +97,7 @@ export function TexLivePreview({
     setMessage('Đã đổi thứ tự. Bấm Biên dịch xem trước để cập nhật PDF.');
   }
   function change(patch: Partial<TexPreviewSettings>) {
+    compileAbort.current?.abort();
     clearPdf();
     setLog('');
     setErrorLine(null);
@@ -131,6 +143,7 @@ export function TexLivePreview({
       setMessage('Đang chuẩn bị và biên dịch…');
       try {
         const setup = await invoke<string>('tex_preview_read_setup', { settings: currentSettings });
+        abort.signal.throwIfAborted();
         if (cancelled.current) throw new Error('Đã hủy biên dịch.');
         const options = {
           integrated: currentSettings.mode !== 'project',
@@ -141,6 +154,7 @@ export function TexLivePreview({
           : null;
         const prepared = batch ?? prepareTexPreview(source, setup, options);
         await invoke('tex_preview_save_settings', { settings: currentSettings });
+        abort.signal.throwIfAborted();
         if (cancelled.current) throw new Error('Đã hủy biên dịch.');
         const result = await queuedTexCompile(
           {
@@ -150,6 +164,7 @@ export function TexLivePreview({
           },
           abort.signal,
         );
+        abort.signal.throwIfAborted();
         setLog(result.log);
         if (!result.success) {
           const diagnosed = diagnoseTexLog(result.log);
@@ -191,9 +206,12 @@ export function TexLivePreview({
           `Đã biên dịch ${currentItems.length || 1} câu theo thứ tự đã chọn. Có thể lưu PDF bên dưới.`,
         );
       } catch (error) {
-        setMessage(errorText(error));
+        if (!abort.signal.aborted) setMessage(errorText(error));
       } finally {
-        setBusy(false);
+        if (compileAbort.current === abort) {
+          compileAbort.current = null;
+          setBusy(false);
+        }
       }
     },
     [clearPdf, ordered, settings, source],

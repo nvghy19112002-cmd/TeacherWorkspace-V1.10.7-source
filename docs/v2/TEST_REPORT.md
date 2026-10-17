@@ -25,3 +25,7 @@ Không có kết quả native Rust/Windows hoặc installer V2 trong máy Linux 
 - 10 E2E AI/bank/import/library liên quan đạt trên thay đổi search/parser ban đầu; sau metadata integration, 7 E2E search/pagination/library/import đạt.
 - 5 Rust database tests đạt qua isolated verification (logic DB và bundled SQLite thật; không gồm Tauri IPC/GTK hoặc toàn app Windows).
 - Không sửa migration 001/002. Migration 003 từ v2 giữ nguyên 200 source và có backup mở lại được.
+
+## M3
+
+244 Vitest tests / 31 files, 14 release tests, lint/TypeScript/build đạt. 3 E2E rendering/corpus đạt; 1 optional PDF corpus skipped. Test raster dùng PDF do pdflatex thật tạo; test React source A→B dùng native bridge mock có chủ đích để kiểm tra race/error UI, không giả lập kết quả native Windows đã chạy.

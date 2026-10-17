@@ -45,3 +45,40 @@ it('does not compile or cancel another request when a queued request is aborted'
   await check;
   expect(invoke).toHaveBeenCalledTimes(1);
 });
+it('binds caller cache labels to the actual source and does not cache external dependencies', async () => {
+  const { clearTexCompileCache } =
+    await import('../src/modules/question-bank/services/texCompileQueue');
+  clearTexCompileCache();
+  invoke.mockClear();
+  invoke.mockResolvedValue({ success: true, pdf: [37, 80, 68, 70], log: '' });
+  await queuedTexCompile(args, new AbortController().signal, 'same-label');
+  await queuedTexCompile(
+    { ...args, question: 'changed source' },
+    new AbortController().signal,
+    'same-label',
+  );
+  expect(invoke).toHaveBeenCalledTimes(2);
+  const external = { ...args, question: String.raw`\includegraphics{figure.png}` };
+  await queuedTexCompile(external, new AbortController().signal, 'external');
+  await queuedTexCompile(external, new AbortController().signal, 'external');
+  expect(invoke).toHaveBeenCalledTimes(4);
+});
+it('clearing during an in-flight request does not repopulate the old cache', async () => {
+  const { clearTexCompileCache, texCacheStats } =
+    await import('../src/modules/question-bank/services/texCompileQueue');
+  clearTexCompileCache();
+  invoke.mockClear();
+  let release!: () => void;
+  invoke.mockImplementation(async () => {
+    await new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    return { success: true, pdf: [1, 2, 3], log: '' };
+  });
+  const pending = queuedTexCompile(args, new AbortController().signal, 'in-flight');
+  await vi.waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
+  clearTexCompileCache();
+  release();
+  await pending;
+  expect(texCacheStats()).toEqual({ entries: 0, bytes: 0 });
+});

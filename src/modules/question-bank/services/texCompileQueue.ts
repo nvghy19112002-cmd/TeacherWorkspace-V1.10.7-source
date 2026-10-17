@@ -13,6 +13,17 @@ interface Args {
 let tail: Promise<unknown> = Promise.resolve();
 const cache = new Map<string, TexCompileResult>();
 let cacheBytes = 0;
+let cacheGeneration = 0;
+export function texCacheStats() {
+  return { entries: cache.size, bytes: cacheBytes };
+}
+export function clearTexCompileCache() {
+  cache.clear();
+  cacheBytes = 0;
+  cacheGeneration++;
+}
+const entryBytes = (key: string, value: TexCompileResult) =>
+  key.length * 2 + value.pdf.length * 8 + value.log.length * 2;
 
 /** Shared by inline figures and the PDF dialog: never cancel another caller's job. */
 export function queuedTexCompile(
@@ -20,14 +31,21 @@ export function queuedTexCompile(
   signal: AbortSignal,
   cacheKey = '',
 ): Promise<TexCompileResult> {
+  const generation = cacheGeneration;
+  const dependencies = args.document.replace(/\\input\s*\{question\.tex\}/g, '') + args.question;
+  const external =
+    args.settings.mode === 'project' ||
+    /\\(?:input|include|includegraphics)\b|\\addplot(?:\+)?\s+graphics\b/.test(dependencies);
+  // Caller labels are never enough: bind cached output to the exact source and settings.
+  const key = cacheKey && !external ? JSON.stringify([cacheKey, args]) : '';
   const task = tail
     .catch(() => undefined)
     .then(async () => {
       signal.throwIfAborted();
-      if (cacheKey && cache.has(cacheKey)) {
-        const value = cache.get(cacheKey)!;
-        cache.delete(cacheKey);
-        cache.set(cacheKey, value);
+      if (key && cache.has(key)) {
+        const value = cache.get(key)!;
+        cache.delete(key);
+        cache.set(key, value);
         return value;
       }
       let cancelling: Promise<unknown> | undefined;
@@ -41,12 +59,17 @@ export function queuedTexCompile(
           args as unknown as Record<string, unknown>,
         );
         signal.throwIfAborted();
-        if (result.success && cacheKey && result.pdf.length <= 4 * 1024 * 1024) {
-          cache.set(cacheKey, result);
-          cacheBytes += result.pdf.length;
+        if (
+          result.success &&
+          key &&
+          generation === cacheGeneration &&
+          result.pdf.length <= 4 * 1024 * 1024
+        ) {
+          cache.set(key, result);
+          cacheBytes += entryBytes(key, result);
           while (cache.size > 40 || cacheBytes > 4 * 1024 * 1024) {
             const first = cache.keys().next().value!;
-            cacheBytes -= cache.get(first)!.pdf.length;
+            cacheBytes -= entryBytes(first, cache.get(first)!);
             cache.delete(first);
           }
         }

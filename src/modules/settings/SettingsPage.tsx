@@ -1,4 +1,5 @@
 import './settings.css';
+import { PerformanceSettings } from './PerformanceSettings';
 import { ClassificationPrompts } from '../question-bank/components/ClassificationPrompts';
 import { useState } from 'react';
 import { UpdatePanel } from '../updates/UpdatePanel';
@@ -46,6 +47,12 @@ export default function SettingsPage() {
       label: 'Prompt phân loại',
       description: 'Phiên bản, thử và đối chiếu',
       icon: Sparkles,
+    },
+    {
+      id: 'performance',
+      label: 'Hiệu năng & cache',
+      description: 'Bộ đệm TeX và ảnh preview',
+      icon: HardDrive,
     },
     { id: 'tex', label: 'TeX Live', description: 'Biên dịch và xem trước LaTeX', icon: Code2 },
     {
@@ -208,6 +215,7 @@ export default function SettingsPage() {
         </nav>
         <div className="settings-content">
           {section === 'prompts' && <ClassificationPrompts />}
+          {section === 'performance' && <PerformanceSettings />}
           <div hidden={section !== 'updates'}>
             <UpdatePanel />
           </div>
