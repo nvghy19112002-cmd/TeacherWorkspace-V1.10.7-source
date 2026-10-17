@@ -1,10 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { releaseChannel } from './release-channel.mjs';
 
-const repo = process.env.GITHUB_REPOSITORY;
-if (repo !== 'nvghy19112002-cmd/TeacherWorkspace') throw new Error('Wrong release repository.');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const config = JSON.parse(readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+const { repository: repo } = releaseChannel(config);
+if (!process.env.GITHUB_REPOSITORY)
+  throw new Error('Run this release preflight in GitHub Actions.');
+if (repo.toLowerCase() !== process.env.GITHUB_REPOSITORY.toLowerCase())
+  throw new Error('The updater endpoint must target this source repository.');
 const cargo = readFileSync('src-tauri/Cargo.toml', 'utf8');
 if (
   !/^\d+\.\d+\.\d+$/.test(pkg.version) ||
@@ -23,7 +27,17 @@ if (
   throw new Error('Updater configuration is incomplete.');
 if (!process.env.TAURI_SIGNING_PRIVATE_KEY?.trim())
   throw new Error(
-    'Add the existing updater key to the TAURI_SIGNING_PRIVATE_KEY repository secret. Do not generate a replacement key.',
+    'Add the signing key matching the configured updater public key to the TAURI_SIGNING_PRIVATE_KEY repository secret. See docs/AUTO_RELEASE.md; do not regenerate a key for each release.',
+  );
+const destination = JSON.parse(
+  execFileSync('gh', ['api', `repos/${repo}`], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }),
+);
+if (destination.private !== false)
+  throw new Error(
+    'The updater release repository must be public so installed apps can download without GitHub credentials.',
   );
 try {
   const release = JSON.parse(

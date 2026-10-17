@@ -2,9 +2,11 @@ import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { releaseChannel } from './release-channel.mjs';
+import { verifyUpdaterArtifact } from './verify-updater-artifact.mjs';
 
-const repo = process.env.GITHUB_REPOSITORY;
-if (repo !== 'nvghy19112002-cmd/TeacherWorkspace') throw new Error('Wrong release repository.');
+const config = JSON.parse(readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+const { repository: repo } = releaseChannel(config);
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
 const tag = `v${version}`;
 const gh = (...args) =>
@@ -24,6 +26,10 @@ try {
   const url = new URL(target.url);
   if (
     url.origin !== 'https://github.com' ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
     !url.pathname.startsWith(`/${repo}/releases/download/${tag}/`)
   )
     throw new Error('Updater URL points to the wrong release.');
@@ -37,6 +43,12 @@ try {
     throw new Error('Uploaded signature differs from manifest.');
   if (!Buffer.from(target.signature, 'base64').toString().startsWith('untrusted comment:'))
     throw new Error('Invalid signature encoding.');
+  gh('release', 'download', tag, '--repo', repo, '--pattern', name, '--dir', dir);
+  verifyUpdaterArtifact(
+    readFileSync(join(dir, name)),
+    target.signature,
+    config.plugins.updater.pubkey,
+  );
   // Publishing is the final mutation, after every required asset is present.
   gh('release', 'edit', tag, '--repo', repo, '--draft=false', '--latest');
   console.log(`Published ${tag}; the app can now discover this update.`);

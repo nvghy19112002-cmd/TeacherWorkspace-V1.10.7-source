@@ -1,4 +1,6 @@
-# Teacher Workspace V1.10.7 — Ngân hàng LaTeX cá nhân
+# Teacher Workspace V1.10.8 — Kênh cập nhật mới
+
+**Chuẩn bị phát triển và cập nhật:** đọc [DEVELOPMENT.md](docs/DEVELOPMENT.md) và [AUTO_RELEASE.md](docs/AUTO_RELEASE.md). Bản 1.10.8 chuyển updater sang repository mã nguồn và khóa ký mới theo lựa chọn của chủ dự án. Cần cài bản chuyển tiếp một lần; các bản sau cập nhật trong app sau khi developer phát hành. Đây là mã đang chuẩn bị, chưa phải bộ cài Windows đã phát hành.
 
 **Bản cập nhật mới nhất:** đọc `docs/UPDATE_V1.10.7.md` và `docs/TEST_REPORT_V1.10.7.md`. Cài đặt chia nhóm, thanh icon, nhiều API key luân phiên, tải/thử model và sửa xem trước bằng bộ 200 câu. Cần Node.js >=22.13; chạy `Build-Windows.cmd` cho bộ cài thông thường. Hướng dẫn chuyển sang bàn giao `.exe`: `docs/WINDOWS_INSTALLER.md`.
 

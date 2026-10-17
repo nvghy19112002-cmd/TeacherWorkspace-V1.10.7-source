@@ -1,5 +1,9 @@
 # Teacher Workspace
 
+## V1.10.8 · Chuẩn bị kênh cập nhật mới
+
+Phát triển theo [DEVELOPMENT.md](docs/DEVELOPMENT.md), phát hành theo [AUTO_RELEASE.md](docs/AUTO_RELEASE.md). Kênh mới dùng GitHub Releases của repository mã nguồn và khóa ký mới; người dùng cần cài thủ công bản chuyển tiếp một lần. Các bản sau tải và cài qua mục Cập nhật trong app. Bản này đang được chuẩn bị, chưa xác thực build/cài Windows hoặc phát hành trên GitHub.
+
 ## V1.10.7 · Cài đặt mới và kiểm thử 200 câu
 
 Thanh điều hướng chỉ icon; Cài đặt chia nhóm; nhập nhiều API key, luân phiên, danh sách model từ API và thử JSON. Bộ đọc hỗ trợ eqnarray, bảng, itemchoice và giữ hình trong immini. Xem [chi tiết](docs/UPDATE_V1.10.7.md), [kiểm thử](docs/TEST_REPORT_V1.10.7.md), [bộ cài Windows](docs/WINDOWS_INSTALLER.md).

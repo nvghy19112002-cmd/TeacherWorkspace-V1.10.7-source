@@ -4058,7 +4058,7 @@ dependencies = [
 
 [[package]]
 name = "teacher-workspace"
-version = "1.10.7"
+version = "1.10.8"
 dependencies = [
  "keyring",
  "rusqlite",

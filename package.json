@@ -1,6 +1,6 @@
 {
   "name": "teacher-workspace",
-  "version": "1.10.7",
+  "version": "1.10.8",
   "private": true,
   "type": "module",
   "engines": {
@@ -21,7 +21,8 @@
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run test && npm run build",
+    "test:release": "node --test tests/release-pipeline.test.mjs",
+    "check": "npm run lint && npm run test && npm run test:release && npm run build",
     "test:e2e": "playwright test"
   },
   "dependencies": {
