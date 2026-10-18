@@ -1,6 +1,12 @@
 name: Publish Windows update
 on:
   workflow_dispatch:
+    inputs:
+      publish_draft_only:
+        description: Verify and publish an existing signed draft without rebuilding
+        required: false
+        type: boolean
+        default: false
   push:
     tags: ['v*']
 permissions:
@@ -10,6 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.publish_draft_only }}
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
@@ -74,10 +81,39 @@ jobs:
       - name: Verify uploaded assets and publish update
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/publish-release.mjs
+        shell: pwsh
+        run: |
+          node scripts/publish-release.mjs 2>&1 | Tee-Object -FilePath publish-release.log
+          if ($LASTEXITCODE -ne 0) {
+            $details = (Get-Content publish-release.log -Tail 20) -join "`n"
+            $details = $details -replace '%', '%25' -replace "`r", '%0D' -replace "`n", '%0A'
+            Write-Output "::error title=Updater release verification failed::$details"
+            exit 1
+          }
       - name: Preserve release failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: release-failure-diagnostics
           path: test-results/
+  publish-existing-draft:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_draft_only }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify uploaded assets and publish update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          node scripts/publish-release.mjs 2>&1 | Tee-Object -FilePath publish-release.log
+          if ($LASTEXITCODE -ne 0) {
+            $details = (Get-Content publish-release.log -Tail 20) -join "`n"
+            $details = $details -replace '%', '%25' -replace "`r", '%0D' -replace "`n", '%0A'
+            Write-Output "::error title=Updater release verification failed::$details"
+            exit 1
+          }
