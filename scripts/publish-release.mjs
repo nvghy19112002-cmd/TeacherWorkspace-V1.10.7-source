@@ -30,21 +30,23 @@ const download = (asset) =>
   const target = manifest.platforms?.['windows-x86_64'];
   if (manifest.version !== version || !target?.signature || !target.url)
     throw new Error('Invalid version or Windows x64 platform in manifest.');
-  const url = new URL(target.url);
-  if (
-    url.origin !== 'https://github.com' ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash ||
-    !url.pathname.startsWith(`/${repo}/releases/download/`)
-  )
-    throw new Error(`Updater URL points to the wrong release: ${target.url}`);
-  const name = decodeURIComponent(url.pathname.split('/').at(-1));
-  const installer = release.assets.find((a) => a.name === name && a.size > 0);
+  const installers = release.assets.filter((a) => a.name.endsWith('.exe') && a.size > 0);
+  if (installers.length !== 1)
+    throw new Error('Expected exactly one NSIS installer. Release remains draft.');
+  const installer = installers[0];
+  const name = installer.name;
   const signature = release.assets.find((a) => a.name === `${name}.sig` && a.size > 0);
-  if (!name.endsWith('.exe') || !installer || !signature)
-    throw new Error('Missing NSIS installer/signature. Release remains draft.');
+  if (!signature) throw new Error('Missing NSIS installer signature. Release remains draft.');
+  const url = new URL(target.url);
+  const isReleaseUrl =
+    url.origin === 'https://github.com' &&
+    url.pathname.startsWith(`/${repo}/releases/download/`) &&
+    decodeURIComponent(url.pathname.split('/').at(-1)) === name;
+  const isAssetApiUrl =
+    url.origin === 'https://api.github.com' &&
+    url.pathname === `/repos/${repo}/releases/assets/${installer.id}`;
+  if (url.username || url.password || url.search || url.hash || (!isReleaseUrl && !isAssetApiUrl))
+    throw new Error(`Updater URL points to the wrong release: ${target.url}`);
   const canonicalUrl = `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name)}`;
   if (target.url !== canonicalUrl) {
     target.url = canonicalUrl;
