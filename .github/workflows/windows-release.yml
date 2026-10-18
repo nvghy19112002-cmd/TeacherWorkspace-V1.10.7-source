@@ -35,6 +35,19 @@ jobs:
       - run: npx playwright install chromium
       - run: npm run test:e2e
       - run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Build and sign Windows installer with actionable diagnostics
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          npm run desktop:build -- --target x86_64-pc-windows-msvc -- --locked 2>&1 | Tee-Object -FilePath tauri-build.log
+          if ($LASTEXITCODE -ne 0) {
+            $details = (Get-Content tauri-build.log -Tail 30) -join "`n"
+            $details = $details -replace '%', '%25' -replace "`r", '%0D' -replace "`n", '%0A'
+            Write-Output "::error title=Signed Windows build failed::$details"
+            exit 1
+          }
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
