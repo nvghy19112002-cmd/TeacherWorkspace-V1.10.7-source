@@ -1,4 +1,16 @@
-# Teacher Workspace 2.0.1
+# Teacher Workspace 2.0.2
+
+- Thêm nút **AI xử lý ID** để đưa toàn bộ câu chưa có ID vào một lô, tối đa 1.000 câu,
+  giữ checkpoint và chỉ để giáo viên xử lý ngoại lệ.
+- Danh sách Gemini tự lọc và xếp hạng tối đa 5 model văn bản phù hợp nhất từ API;
+  loại model TTS, ảnh, live, embedding và tự chọn model đề xuất đầu tiên.
+- Ngăn ghi chú ngoặc vuông bị hiểu nhầm là ID6 và ngăn cấp trùng số với dữ liệu cũ
+  thiếu `sequenceNumber`.
+- Nhận dạng loại câu và hình vẽ chỉ từ LaTeX có hiệu lực trong phần đề, không bị mã
+  trong lời giải hoặc comment làm sai metadata.
+- Bổ sung tài liệu rà soát chất lượng, mô hình một kho SQLite và lộ trình quản lý nguồn.
+
+## Teacher Workspace 2.0.1
 
 - Ngăn model TTS, âm thanh, hình ảnh, live và embedding xuất hiện trong danh sách model
   dùng cho tác vụ JSON văn bản.
