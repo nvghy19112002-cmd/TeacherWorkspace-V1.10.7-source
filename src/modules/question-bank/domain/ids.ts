@@ -54,7 +54,10 @@ export function nextQuestionId(questions: Question[], classificationCode: string
       0,
       ...questions
         .filter((question) => question.classificationCode === classificationCode)
-        .map((question) => question.sequenceNumber ?? 0),
+        .map(
+          (question) =>
+            question.sequenceNumber ?? splitDisplayId(question.displayId)?.sequence ?? 0,
+        ),
     ) + 1;
   return {
     sequenceNumber,

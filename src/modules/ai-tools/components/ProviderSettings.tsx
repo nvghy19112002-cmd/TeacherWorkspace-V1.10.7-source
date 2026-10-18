@@ -297,9 +297,10 @@ export function ProviderSettings({
         controller.current.signal,
       );
       setModels(list);
+      setName((current) => (list.includes(current) ? current : (list[0] ?? '')));
       setCatalogKey(meta.id);
       setDiagnostic(
-        `Đã tải ${list.length} model cho ${meta.label}. Đây là kiểm tra danh sách; dùng Thử model để kiểm tra gọi JSON.`,
+        `Đã chọn lọc ${list.length} model Gemini phù hợp nhất cho ${meta.label}. Dùng Thử model để kiểm tra JSON trước khi lưu.`,
       );
       await saveKeyPool((current) => ({
         ...current,
@@ -309,7 +310,7 @@ export function ProviderSettings({
             : item,
         ),
       }));
-      toast(`${meta.label}: kết nối thành công, ${list.length} model.`);
+      toast(`${meta.label}: đã chọn lọc ${list.length} model phù hợp nhất.`);
     } catch (error) {
       await saveKeyPool((current) => ({
         ...current,

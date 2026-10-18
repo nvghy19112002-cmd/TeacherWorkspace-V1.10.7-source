@@ -166,6 +166,20 @@ export default function QuestionBankPage() {
     () => orderedQuestions(checked, data.questions),
     [checked, data.questions],
   );
+  const questionsNeedingId = useMemo(
+    () => activeQuestions.filter((question) => !question.displayId && !question.idLocked),
+    [activeQuestions],
+  );
+  function scanQuestionsNeedingId() {
+    if (!questionsNeedingId.length) {
+      toast('Không còn câu nào cần gán ID.');
+      return;
+    }
+    const batch = questionsNeedingId.slice(0, 1000);
+    if (questionsNeedingId.length > batch.length)
+      toast(`Đang xử lý 1.000/${questionsNeedingId.length.toLocaleString('vi-VN')} câu cần ID.`);
+    setAiQuestions(batch);
+  }
   useEffect(() => {
     const shortcuts = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || document.querySelector('dialog[open]')) return;
@@ -878,6 +892,14 @@ export default function QuestionBankPage() {
           </div>
         </div>
         <div className="qb-header-actions">
+          <button
+            className="button primary"
+            disabled={busy || !questionsNeedingId.length}
+            onClick={scanQuestionsNeedingId}
+          >
+            <Sparkles size={16} /> AI xử lý ID
+            {questionsNeedingId.length > 0 && <b>{questionsNeedingId.length}</b>}
+          </button>
           <button
             className={`button secondary qb-tray-trigger ${checked.length ? 'has-items' : ''}`}
             onClick={() => setTrayOpen(true)}

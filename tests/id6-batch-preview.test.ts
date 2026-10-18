@@ -49,6 +49,10 @@ Question \choice{A}{B}{C}{D}
       extractSourceIds(String.raw`\begin{ex}% Câu 1 [0C1N1-1]
 Q\end{ex}`)[0].origin,
     ).toBe('chú thích');
+    expect(
+      extractSourceIds(String.raw`\begin{ex}% [Đề tham khảo 2026] [0C1N1-1]
+Q\end{ex}`),
+    ).toEqual([{ value: '0C1N1-1', origin: 'chú thích' }]);
   });
   it('reads a valid ID6 into editor metadata, preserving source and locked IDs', () => {
     const tree = mergeMathHubId6([]);

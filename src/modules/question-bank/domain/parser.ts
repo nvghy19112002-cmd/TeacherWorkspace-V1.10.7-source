@@ -17,10 +17,12 @@ export interface ParsedQuestion {
 }
 
 export function detectQuestionType(source: string): Question['questionType'] {
-  if (/\\choiceTF\b/.test(source)) return 'true_false';
-  if (/\\choice\b/.test(source)) return 'multiple_choice';
-  if (/\\shortans(?:\[[^\]]*\])?\s*\{/.test(source)) return 'short_answer';
-  if (/\\begin\{enumerate\}|\\begin\{itemize\}/.test(source)) return 'multi_part';
+  const clean = maskComments(source);
+  const question = clean.split(/\\loigiai\b/, 1)[0];
+  if (/\\choiceTF\b/.test(question)) return 'true_false';
+  if (/\\choice\b/.test(question)) return 'multiple_choice';
+  if (/\\shortans(?:\[[^\]]*\])?\s*\{/.test(question)) return 'short_answer';
+  if (/\\begin\{enumerate\}|\\begin\{itemize\}/.test(question)) return 'multi_part';
   return 'essay';
 }
 
@@ -91,7 +93,8 @@ export function parseExTest(source: string): ParsedQuestion[] {
       questionType,
       answer,
       solution,
-      hasImage: /\\includegraphics|\\begin\{tikzpicture\}|\\begin\{axis\}/.test(rawSource),
+      hasImage:
+        /\\includegraphics|\\begin\{(?:tikzpicture|axis|asy|pspicture|picture)\}/.test(clean),
       warnings,
     };
   });

@@ -78,7 +78,8 @@ export function extractSourceIds(source: string): SourceIdCandidate[] {
     }
   };
   add(/\\begin\{ex\}\s*\[([^\]\r\n]{1,80})\]/g, 'tham số ex');
-  add(/%\s*\[([^\]\r\n]{1,80})\]/g, 'chú thích');
+  // Bracketed comments often contain years, exam names or editorial notes. Only
+  // accept the established ID6 shape here so those notes do not make a valid ID ambiguous.
   add(/%[^\r\n]*?\[([0-9A-Z]+[A-Z]\d+[A-Z]\d+-\d+(?:-\d{3,})?)\]/gi, 'chú thích');
   add(/%\s*(?:ID6?|Mã\s*ID)\s*[:=]\s*\[?([^\s\]\r\n]{1,80})\]?/gi, 'chú thích');
   add(/\\label\{((?:[0-9A-Z]+[A-Z]\d+[A-Z]\d+-\d+(?:-\d{3,})?))\}/gi, 'nhãn');

@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { geminiProvider, testGeminiModel } from '../src/modules/ai-tools/services/aiProvider';
 import { geminiHttpError } from '../src/modules/ai-tools/services/geminiDiagnostics';
 import { readKeyPool, requestKeys } from '../src/modules/ai-tools/domain/keyPool';
+import { recommendedStructuredTextModels } from '../src/modules/ai-tools/domain/modelCapabilities';
 afterEach(() => vi.unstubAllGlobals());
 it('loads all model pages and excludes models without generateContent', async () => {
   const fetcher = vi
@@ -71,6 +72,26 @@ it('rejects non-text Gemini models before sending a structured-output request', 
     testGeminiModel('gemini-3.8-flash-tts', 'fake-key-model', new AbortController().signal),
   ).rejects.toThrow(/TTS/);
   expect(fetcher).not.toHaveBeenCalled();
+});
+it('shows at most five recommended text models with newer Pro and Flash models first', () => {
+  expect(
+    recommendedStructuredTextModels([
+      'gemini-1.5-pro',
+      'gemini-2.5-flash-lite',
+      'gemini-2.5-pro',
+      'gemini-3-flash-preview',
+      'gemini-3-pro-preview',
+      'gemini-2.5-flash',
+      'gemini-3-live-preview',
+      'gemini-2.0-flash',
+    ]),
+  ).toEqual([
+    'gemini-3-pro-preview',
+    'gemini-3-flash-preview',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+  ]);
 });
 it('rotates enabled keys and keeps legacy priority settings compatible', () => {
   const pool = readKeyPool(

@@ -9,6 +9,7 @@ import { mergeMathHubId6 } from '../src/modules/question-bank/domain/mathhubCurr
 import { parseExTest, parsedToQuestion } from '../src/modules/question-bank/domain/parser';
 import { createExam, examToLatex } from '../src/modules/question-bank/domain/exams';
 import { emptyBankSnapshot } from '../src/modules/question-bank/domain/model';
+import { nextQuestionId } from '../src/modules/question-bank/domain/ids';
 import { readFileSync } from 'node:fs';
 
 const nodes = mergeMathHubId6([]);
@@ -161,5 +162,17 @@ New\end{ex}`,
     expect(ids).toEqual(['a', 'b', 'c']);
     expect(moveSelection(ids, 'a', -1)).toBe(ids);
     expect(searchText('Độ dài đường thẳng')).toContain('do dai duong thang');
+  });
+  it('does not reuse an ID number from legacy rows that lack sequenceNumber', () => {
+    const legacy = {
+      ...make(String.raw`\begin{ex}%[0C1N1-1]
+Legacy\end{ex}`),
+      displayId: '0C1N1-1-014',
+      sequenceNumber: null,
+    };
+    expect(nextQuestionId([legacy], '0C1N1-1')).toEqual({
+      displayId: '0C1N1-1-015',
+      sequenceNumber: 15,
+    });
   });
 });

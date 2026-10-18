@@ -55,6 +55,14 @@ describe('Question bank import and LaTeX boundaries', () => {
     expect(rows[0].answer).toBe('');
     expect(rows[0].warnings.join(' ')).toContain('đúng một');
   });
+  it('does not infer the question type or an image from comments and the solution', () => {
+    const row = parseExTest(
+      wrap(String.raw`Bài tự luận. % \includegraphics{ghost.png}
+\loigiai{\begin{enumerate}\item Giải bước một.\end{enumerate}\choice{A}{B}{C}{D}}`),
+    )[0];
+    expect(row.questionType).toBe('essay');
+    expect(row.hasImage).toBe(false);
+  });
   it('rejects incomplete blocks and preserves nested ex blocks with a review warning', () => {
     expect(() => parseExTest(wrap('Đủ') + '\\begin{ex}Thiếu')).toThrow('chưa đóng');
     const nested = parseExTest(wrap(wrap('Lồng')));

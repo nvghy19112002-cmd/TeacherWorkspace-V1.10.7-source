@@ -30,6 +30,37 @@ export function structuredTextModelReason(model: string): string | null {
 export function isStructuredTextModelCandidate(model: string): boolean {
   return structuredTextModelReason(model) === null;
 }
+
+/** Keep setup small: show only the newest suitable Pro, Flash and Lite models. */
+export function recommendedStructuredTextModels(models: Iterable<string>, limit = 5): string[] {
+  const score = (name: string) => {
+    const lower = name.toLowerCase();
+    const version = /gemini-(\d+)(?:\.(\d+))?/.exec(lower);
+    const generation = version ? Number(version[1]) * 1000 + Number(version[2] ?? 0) * 100 : 0;
+    const tier = lower.includes('pro')
+      ? 70
+      : lower.includes('flash-lite')
+        ? 30
+        : lower.includes('flash')
+          ? 50
+          : 10;
+    const channel = lower.includes('latest')
+      ? 25
+      : lower.includes('stable')
+        ? 15
+        : lower.includes('preview') || lower.includes('exp')
+          ? -10
+          : 20;
+    return generation + tier + channel;
+  };
+  return [...new Set(models)]
+    .filter(isStructuredTextModelCandidate)
+    .sort(
+      (left, right) =>
+        score(right) - score(left) || left.localeCompare(right, undefined, { numeric: true }),
+    )
+    .slice(0, Math.max(0, limit));
+}
 export const modelCheckSchema = z.object({
   model: modelNameSchema,
   keyId: z.string().max(100),

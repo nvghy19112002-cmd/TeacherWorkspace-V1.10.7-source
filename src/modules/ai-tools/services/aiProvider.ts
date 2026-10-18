@@ -5,6 +5,7 @@ import { modelNameSchema, reportSchema, type Report } from '../domain/model';
 import { redact } from './credentials';
 import {
   isStructuredTextModelCandidate,
+  recommendedStructuredTextModels,
   structuredTextModelReason,
 } from '../domain/modelCapabilities';
 export interface AiRequest {
@@ -134,7 +135,7 @@ export const geminiProvider: AiProvider = {
       visited.add(token);
       if (visited.size > 100) throw new Error('Danh sách model quá nhiều trang.');
     } while (token);
-    return [...models].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    return recommendedStructuredTextModels(models, 5);
   },
   async generate({ model, key, system, input, signal }) {
     const name = modelNameSchema.parse(model);
