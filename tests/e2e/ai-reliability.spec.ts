@@ -1,9 +1,9 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { openQuestionBank, openWorkspace, waitForWorkspaceReady } from './appReady';
 
 async function seed(page: Page, count: number) {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true }).click();
-  await expect(page.locator('.qb-studio-header')).toBeVisible();
+  await openWorkspace(page);
+  await openQuestionBank(page);
   return page.evaluate(async (count) => {
     const bankPath = '/src/modules/question-bank/store.ts',
       wsPath = '/src/app/store.ts',
@@ -40,11 +40,14 @@ async function seed(page: Page, count: number) {
         },
       },
     }));
-    const questions = Array.from({ length: count }, (_, index) =>
-      parsedToQuestion(
+    const questions = Array.from({ length: count }, (_, index) => ({
+      ...parsedToQuestion(
         parseExTest(`\\begin{ex}Reliability ${index + 1}: $1+1$.\\loigiai{2}\\end{ex}`)[0],
       ),
-    );
+      // Deliberately place question 2 before question 1 in the bank's ID tie-break.
+      id: `reliability-${[2, 1, 3][index] ?? index + 1}`,
+      updatedAt: '2026-10-18T00:00:00.000Z',
+    }));
     await useQuestionBank.getState().commit((s: Record<string, unknown>) => ({ ...s, questions }));
     return questions.map((q: { id: string; rawSource: string }) => ({
       id: q.id,
@@ -127,6 +130,7 @@ test('503 recovers on the same key and records prompt version without applying I
 test('closing during cooldown persists progress and resumes only unfinished questions', async ({
   page,
 }) => {
+  test.setTimeout(90000);
   let calls = 0;
   const sources: string[] = [];
   await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
@@ -158,13 +162,35 @@ test('closing during cooldown persists progress and resumes only unfinished ques
       }),
     )
     .toBe(true);
+  const completedSource = sources[0],
+    retrySource = sources[1];
+  expect(completedSource).toContain('Reliability 2:');
+  expect(retrySource).toContain('Reliability 1:');
+  // Reload discards component/global queue state; progress must come from SQLite settings.
+  await page.reload();
+  await waitForWorkspaceReady(page);
+  // Browser credentials are deliberately memory-only; emulate re-entering the key.
+  // Desktop persists credentials in its native vault, which this browser test does not use.
+  await page.evaluate(async () => {
+    const path = '/src/modules/ai-tools/services/credentials.ts';
+    await (await import(path)).storeKey('fake-reliability-key', 'reliability');
+  });
+  await openQuestionBank(page);
   modal = await openScan(page);
   await expect(modal.getByRole('status')).toContainText('Đã lưu 1');
   page.once('dialog', (dialog) => void dialog.accept());
   await modal.getByRole('button', { name: /Thử lại câu lỗi/ }).click();
   await expect(modal.getByRole('status')).toContainText('Đã lưu 3', { timeout: 30000 });
   expect(calls).toBe(4);
-  expect(sources.filter((s) => s.includes('Reliability 1:'))).toHaveLength(1);
+  expect(sources.filter((s) => s === completedSource)).toHaveLength(1);
+  expect(sources.filter((s) => s === retrySource)).toHaveLength(2);
+  expect(new Set(sources).size).toBe(3);
+  const runs = await page.evaluate(async () => {
+    const path = '/src/modules/question-bank/store.ts';
+    return (await import(path)).useQuestionBank.getState().data.classificationRuns;
+  });
+  expect(runs).toHaveLength(3);
+  expect(new Set(runs.map((r: { questionId: string }) => r.questionId)).size).toBe(3);
 });
 test('prompt manager persists a version and compares two real mock requests without changing IDs', async ({
   page,

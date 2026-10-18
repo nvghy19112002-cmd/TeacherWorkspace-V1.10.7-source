@@ -173,3 +173,18 @@ M	src-tauri/tauri.conf.json
 M	tests/e2e/studio-layout.spec.ts
 M	SHA256SUMS.txt
 ```
+
+## Sửa CI sau bàn giao — 2026-10-18
+
+Không thay source runtime của ứng dụng. Các file kiểm thử và báo cáo được cập nhật:
+
+```text
+M tests/e2e/ai-reliability.spec.ts
+M tests/e2e/navigation-curriculum.spec.ts
+A tests/e2e/appReady.ts
+A tests/e2e/app-startup.spec.ts
+A docs/v2/CI_FIXES_2026-10-18.md
+M docs/v2/TEST_REPORT.md
+M docs/v2/CHANGED_FILES.md
+M SHA256SUMS.txt
+```

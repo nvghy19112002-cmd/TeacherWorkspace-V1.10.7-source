@@ -90,3 +90,20 @@ và template xuất đề còn cần hoàn thiện/đối chiếu. Không coi c�
 
 Log được sao chép sang thư mục deliverables/qa để giữ cùng bàn giao cục bộ; source
 ZIP chứa báo cáo tóm tắt và mã kiểm thử, không chứa database người dùng hoặc khóa riêng.
+
+
+## Sửa CI Windows sau bàn giao — 2026-10-18
+
+Log Windows do người dùng cung cấp có 3 failed / 21 passed / 2 skipped. Đã xác định
+hai vấn đề đồng bộ màn hình khởi động và một giả định sai về thứ tự câu trong test
+resume; không coi kết quả Linux cũ là bằng chứng Windows đã chạy đạt. Xem
+[phân tích và bản sửa](CI_FIXES_2026-10-18.md).
+
+Check cục bộ mới đạt lint, 250 unit tests, 14 release tests, TypeScript và build.
+Các ca liên quan chạy với CI=true, repeat-each=2 đạt 10/10, không bật test retries.
+Full E2E với CI=true và bộ PDF thật: **27 passed, 0 failed, 0 skipped (4,1 phút)**.
+Ba ảnh lịch/export được khôi phục nguyên bytes sau chạy. API GitHub vẫn Forbidden;
+chưa xác nhận kết quả workflow Windows mới.
+
+Không đổi phiên bản 2.0.0, source ứng dụng, khóa ký hoặc schema để sửa các lỗi test
+này. Native Windows/installer cần kết quả workflow mới sau push.

@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { openWorkspace } from './appReady';
 
 test('shared navigation keeps its geometry and curriculum shows exactly three KNTT grades', async ({
   page,
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
+  await openWorkspace(page);
   await expect(page.getByRole('button', { name: 'Thời khóa biểu', exact: true })).toHaveAttribute(
     'aria-current',
     'page',
@@ -28,15 +29,18 @@ test('shared navigation keeps its geometry and curriculum shows exactly three KN
     await gate;
     await route.continue();
   });
-  await page.getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true }).click();
-  await requested;
-  await expect(page.getByRole('button', { name: 'Thời khóa biểu', exact: true })).toHaveAttribute(
-    'aria-current',
-    'page',
-  );
-  await expect(page.locator('.breadcrumb strong')).toHaveText('Thời khóa biểu');
-  expect(await geometry()).toEqual(before);
-  releasePage();
+  try {
+    await page.getByRole('button', { name: 'Ngân hàng câu hỏi', exact: true }).click();
+    await requested;
+    await expect(page.getByRole('button', { name: 'Thời khóa biểu', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(page.locator('.breadcrumb strong')).toHaveText('Thời khóa biểu');
+    expect(await geometry()).toEqual(before);
+  } finally {
+    releasePage();
+  }
   await expect(page.locator('.qb-studio')).toBeVisible();
   expect(await geometry()).toEqual(before);
   await page.getByRole('button', { name: /Lọc theo mục lục/ }).click();
