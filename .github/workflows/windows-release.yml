@@ -35,10 +35,17 @@ jobs:
       - run: npx playwright install chromium
       - run: npm run test:e2e
       - run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - name: Normalize updater signing key
+        shell: pwsh
+        env:
+          RAW_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          $key = $env:RAW_TAURI_SIGNING_PRIVATE_KEY.Trim()
+          if (-not $key) { throw 'TAURI_SIGNING_PRIVATE_KEY is empty after normalization.' }
+          [IO.File]::AppendAllText($env:GITHUB_ENV, "TAURI_SIGNING_PRIVATE_KEY=$key`n", [Text.UTF8Encoding]::new($false))
       - name: Build and sign Windows installer with actionable diagnostics
         shell: pwsh
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npm run desktop:build -- --target x86_64-pc-windows-msvc -- --locked 2>&1 | Tee-Object -FilePath tauri-build.log
@@ -51,7 +58,6 @@ jobs:
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           owner: ${{ steps.channel.outputs.owner }}
