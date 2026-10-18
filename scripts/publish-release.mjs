@@ -39,7 +39,7 @@ const download = (asset) =>
     url.hash ||
     !url.pathname.startsWith(`/${repo}/releases/download/`)
   )
-    throw new Error('Updater URL points to the wrong release.');
+    throw new Error(`Updater URL points to the wrong release: ${target.url}`);
   const name = decodeURIComponent(url.pathname.split('/').at(-1));
   const installer = release.assets.find((a) => a.name === name && a.size > 0);
   const signature = release.assets.find((a) => a.name === `${name}.sig` && a.size > 0);
