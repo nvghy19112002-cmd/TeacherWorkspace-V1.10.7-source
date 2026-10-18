@@ -10,7 +10,11 @@ import { geminiProvider } from '../services/aiProvider';
 import { saveAiState } from '../services/state';
 import { AiRequestError } from '../services/requestManager';
 import { saveModuleSetting } from '../../../services/moduleSettings';
-import { readModelChecks, verifiedModel } from '../domain/modelCapabilities';
+import {
+  readModelChecks,
+  structuredTextModelReason,
+  verifiedModel,
+} from '../domain/modelCapabilities';
 import { modelNameSchema } from '../domain/model';
 import { readKeyPool, saveKeyPool, type KeyMeta, type KeyPool } from '../domain/keyPool';
 
@@ -54,6 +58,7 @@ export function ProviderSettings({
   const [busyId, setBusyId] = useState<string | null>(null);
   const controller = useRef<AbortController | null>(null);
   const toast = useToasts((state) => state.push);
+  const modelIncompatibility = name.trim() ? structuredTextModelReason(name.trim()) : null;
 
   useEffect(() => {
     let active = true;
@@ -532,14 +537,16 @@ export function ProviderSettings({
             </button>
             <button
               className="button secondary"
-              disabled={!name.trim() || busyModel || busyId !== null}
+              disabled={
+                !name.trim() || Boolean(modelIncompatibility) || busyModel || busyId !== null
+              }
               onClick={() => void probeModel()}
             >
               Thử model
             </button>
             <button
               className="button primary"
-              disabled={!name.trim()}
+              disabled={!name.trim() || Boolean(modelIncompatibility)}
               onClick={() =>
                 void (async () => {
                   try {
@@ -556,6 +563,11 @@ export function ProviderSettings({
               Lưu model
             </button>
           </div>
+          {modelIncompatibility && (
+            <p className="ai-error" role="alert">
+              {modelIncompatibility} Hãy tải danh sách và chọn model văn bản.
+            </p>
+          )}
           {catalogKey && catalogKey !== pool.activeId && (
             <p className="ai-error">Danh sách thuộc key khác. Tải lại model cho key đang chọn.</p>
           )}

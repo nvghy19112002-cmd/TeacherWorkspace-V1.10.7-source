@@ -11,6 +11,11 @@ it('loads all model pages and excludes models without generateContent', async ()
         JSON.stringify({
           models: [
             { name: 'models/gemini-test-a', supportedGenerationMethods: ['generateContent'] },
+            {
+              name: 'models/gemini-3.8-flash-tts',
+              supportedGenerationMethods: ['generateContent'],
+            },
+            { name: 'models/gemini-live-test', supportedGenerationMethods: ['generateContent'] },
             { name: 'models/embed', supportedGenerationMethods: ['embedContent'] },
           ],
           nextPageToken: 'next/a',
@@ -58,6 +63,14 @@ it('probes JSON generation without forcing unsupported sampling parameters', asy
   const body = JSON.parse(fetcher.mock.calls[0][1].body);
   expect(body.generationConfig.temperature).toBeUndefined();
   expect(body.generationConfig.responseMimeType).toBe('application/json');
+});
+it('rejects non-text Gemini models before sending a structured-output request', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  await expect(
+    testGeminiModel('gemini-3.8-flash-tts', 'fake-key-model', new AbortController().signal),
+  ).rejects.toThrow(/TTS/);
+  expect(fetcher).not.toHaveBeenCalled();
 });
 it('rotates enabled keys and keeps legacy priority settings compatible', () => {
   const pool = readKeyPool(

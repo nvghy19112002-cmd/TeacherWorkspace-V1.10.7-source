@@ -7,7 +7,10 @@ import {
 import { emptyBankSnapshot } from '../src/modules/question-bank/domain/model';
 import { parseExTest, parsedToQuestion } from '../src/modules/question-bank/domain/parser';
 
-const configured = vi.hoisted(() => ({ moduleState: {} as Record<string, string> }));
+const configured = vi.hoisted(() => ({
+  moduleState: {} as Record<string, string>,
+  model: 'test-model',
+}));
 vi.mock('../src/app/store', () => ({
   errorText: (error: unknown) => (error instanceof Error ? error.message : String(error)),
   useWorkspace: {
@@ -15,7 +18,7 @@ vi.mock('../src/app/store', () => ({
   },
 }));
 vi.mock('../src/modules/ai-tools/services/state', () => ({
-  readAiState: () => ({ model: 'test-model' }),
+  readAiState: () => ({ model: configured.model }),
 }));
 vi.mock('../src/modules/ai-tools/domain/keyPool', () => ({
   readKeyPool: () => ({ activeId: 'chosen', automatic: false }),
@@ -35,8 +38,30 @@ import {
 } from '../src/modules/question-bank/services/classificationProvider';
 afterEach(() => {
   configured.moduleState = {};
+  configured.model = 'test-model';
   vi.unstubAllGlobals();
   vi.useRealTimers();
+});
+
+it('blocks a TTS model before sending a classification request', async () => {
+  configured.model = 'gemini-3.8-flash-tts';
+  const fetch = vi.fn();
+  vi.stubGlobal('fetch', fetch);
+  await expect(
+    classifyQuestionOnline(
+      snapshot(),
+      parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]),
+      new AbortController().signal,
+    ),
+  ).rejects.toMatchObject({ fatalBatch: true });
+  await expect(
+    classifyQuestionOnline(
+      snapshot(),
+      parsedToQuestion(parseExTest('\\begin{ex}Q\\end{ex}')[0]),
+      new AbortController().signal,
+    ),
+  ).rejects.toThrow(/TTS/);
+  expect(fetch).not.toHaveBeenCalled();
 });
 function snapshot() {
   const s = emptyBankSnapshot();

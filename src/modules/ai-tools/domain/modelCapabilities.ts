@@ -1,5 +1,35 @@
 import { z } from 'zod';
 import { modelNameSchema } from './model';
+
+const NON_TEXT_MODEL_SEGMENTS = new Set([
+  'aqa',
+  'audio',
+  'embedding',
+  'imagen',
+  'image',
+  'live',
+  'speech',
+  'tts',
+  'veo',
+]);
+
+/**
+ * The Gemini catalogue may advertise generateContent for models whose output is
+ * audio, images, or a live stream. Those models cannot satisfy our JSON schema.
+ */
+export function structuredTextModelReason(model: string): string | null {
+  const parsed = modelNameSchema.safeParse(model);
+  if (!parsed.success) return 'Tên model không hợp lệ.';
+  const segments = parsed.data.toLocaleLowerCase('en').split(/[-_.]+/);
+  const unsupported = segments.find((segment) => NON_TEXT_MODEL_SEGMENTS.has(segment));
+  return unsupported
+    ? `Model ${parsed.data} dành cho ${unsupported.toUpperCase()}, không hỗ trợ kết quả JSON văn bản.`
+    : null;
+}
+
+export function isStructuredTextModelCandidate(model: string): boolean {
+  return structuredTextModelReason(model) === null;
+}
 export const modelCheckSchema = z.object({
   model: modelNameSchema,
   keyId: z.string().max(100),

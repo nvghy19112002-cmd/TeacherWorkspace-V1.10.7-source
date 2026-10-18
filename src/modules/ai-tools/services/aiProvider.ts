@@ -3,6 +3,10 @@ import { geminiHttpError } from './geminiDiagnostics';
 import { z } from 'zod';
 import { modelNameSchema, reportSchema, type Report } from '../domain/model';
 import { redact } from './credentials';
+import {
+  isStructuredTextModelCandidate,
+  structuredTextModelReason,
+} from '../domain/modelCapabilities';
 export interface AiRequest {
   model: string;
   key: string;
@@ -120,7 +124,10 @@ export const geminiProvider: AiProvider = {
         .safeParse(value);
       if (!result.success) throw new Error('Không đọc được danh sách model.');
       for (const m of result.data.models)
-        if (m.supportedGenerationMethods?.includes('generateContent'))
+        if (
+          m.supportedGenerationMethods?.includes('generateContent') &&
+          isStructuredTextModelCandidate(m.name.replace(/^models\//, ''))
+        )
           models.add(m.name.replace(/^models\//, ''));
       token = result.data.nextPageToken ?? '';
       if (token && visited.has(token)) throw new Error('API lặp trang danh sách model.');
@@ -131,6 +138,8 @@ export const geminiProvider: AiProvider = {
   },
   async generate({ model, key, system, input, signal }) {
     const name = modelNameSchema.parse(model);
+    const incompatibility = structuredTextModelReason(name);
+    if (incompatibility) throw new Error(incompatibility);
     const value = await requestJson(
       `https://generativelanguage.googleapis.com/v1beta/models/${name}:generateContent`,
       key,
@@ -156,6 +165,8 @@ export async function testGeminiModel(
   signal: AbortSignal,
 ): Promise<void> {
   const name = modelNameSchema.parse(model);
+  const incompatibility = structuredTextModelReason(name);
+  if (incompatibility) throw new Error(incompatibility);
   const value = await requestJson(
     `https://generativelanguage.googleapis.com/v1beta/models/${name}:generateContent`,
     key,

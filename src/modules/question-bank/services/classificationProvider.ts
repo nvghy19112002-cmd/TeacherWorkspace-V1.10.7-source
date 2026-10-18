@@ -7,7 +7,11 @@ import {
   classificationContext,
 } from '../domain/classificationContext';
 import { retrieveCurriculum } from '../domain/curriculumRetrieval';
-import { verifiedModel, readFallbackModels } from '../../ai-tools/domain/modelCapabilities';
+import {
+  verifiedModel,
+  readFallbackModels,
+  structuredTextModelReason,
+} from '../../ai-tools/domain/modelCapabilities';
 import { modelNameSchema } from '../../ai-tools/domain/model';
 import { useWorkspace } from '../../../app/store';
 import { readAiState } from '../../ai-tools/services/state';
@@ -223,6 +227,13 @@ export async function classifyQuestionOnline(
   if (!model || !modelNameSchema.safeParse(model).success)
     throw new ClassificationRequestError(
       'Chưa chọn model Gemini hợp lệ trong Cài đặt → API key.',
+      0,
+      true,
+    );
+  const incompatibility = structuredTextModelReason(model);
+  if (incompatibility)
+    throw new ClassificationRequestError(
+      `${incompatibility} Vào Cài đặt → Model, tải danh sách và chọn model đã thử JSON.`,
       0,
       true,
     );

@@ -1,4 +1,13 @@
-# Teacher Workspace 2.0.0
+# Teacher Workspace 2.0.1
+
+- Ngăn model TTS, âm thanh, hình ảnh, live và embedding xuất hiện trong danh sách model
+  dùng cho tác vụ JSON văn bản.
+- Chặn quét Gán ID trước khi gọi API nếu model đã lưu không tương thích; giao diện chỉ rõ
+  cách tải danh sách, thử structured output và lưu model văn bản.
+- Áp dụng cùng một kiểm tra cho AI Tools, phép thử model và phân loại ngân hàng câu hỏi để
+  tránh mất lượt API hoặc tạo cả lô lỗi với model không hỗ trợ JSON schema.
+
+## Teacher Workspace 2.0.0
 
 - Academic Desktop Studio: palette navy/teal, light/dark, thanh điều hướng mở rộng,
   lưu bố cục, kéo độ rộng khung thư viện/khung đọc, danh sách câu render theo cửa sổ.

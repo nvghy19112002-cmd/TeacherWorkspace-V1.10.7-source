@@ -4,6 +4,7 @@ import { useToasts } from '../../../components/feedback';
 import { useUi } from '../../../app/ui';
 import { errorText, useWorkspace } from '../../../app/store';
 import { readAiState } from '../../ai-tools/services/state';
+import { structuredTextModelReason } from '../../ai-tools/domain/modelCapabilities';
 import { KnttSetup } from './KnttSetup';
 import { KnttCatalogStatus } from './KnttCatalogStatus';
 import { QuestionPreview } from './QuestionPreview';
@@ -358,6 +359,7 @@ export function AiIdScan({
     busy = useQuestionBank((s) => s.busy);
   const settings = useWorkspace((s) => s.data.settings);
   const model = readAiState(settings.moduleState?.aiTools).model;
+  const modelIncompatibility = model ? structuredTextModelReason(model) : null;
   const prompt = activeClassificationPrompt(settings.moduleState?.classificationPrompts);
   const restored = restoreScanJob(settings.moduleState?.classificationJob);
   const selectionIds = new Set(questions.map((q) => q.id));
@@ -613,6 +615,12 @@ export function AiIdScan({
         {!model && (
           <p role="alert">Chưa chọn model Gemini. Vào Cài đặt → API key để thiết lập một lần.</p>
         )}
+        {modelIncompatibility && (
+          <p role="alert">
+            {modelIncompatibility} Vào Cài đặt → Model, tải danh sách, thử JSON rồi lưu model văn
+            bản.
+          </p>
+        )}
         {!context.forms.length && (
           <p role="alert">Phạm vi chưa có dạng bài. Mở Tùy chọn nâng cao để thiết lập.</p>
         )}
@@ -853,7 +861,7 @@ export function AiIdScan({
         {!running && failed.length > 0 && (
           <button
             className="button secondary"
-            disabled={busy || !model || !context.forms.length}
+            disabled={busy || !model || Boolean(modelIncompatibility) || !context.forms.length}
             onClick={() => void start(true)}
           >
             Thử lại câu lỗi / tiếp tục ({failed.length})
@@ -870,7 +878,14 @@ export function AiIdScan({
         )}
         <button
           className={started ? 'button secondary' : 'button primary'}
-          disabled={running || busy || !model || !questions.length || !context.forms.length}
+          disabled={
+            running ||
+            busy ||
+            !model ||
+            Boolean(modelIncompatibility) ||
+            !questions.length ||
+            !context.forms.length
+          }
           onClick={() => void start(false, !started)}
         >
           {started ? (embedded ? 'Quét các câu đã chọn' : 'Quét lại') : 'Xác nhận và quét'}
