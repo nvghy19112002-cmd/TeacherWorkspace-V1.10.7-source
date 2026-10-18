@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { releaseChannel } from './release-channel.mjs';
 import { verifyUpdaterArtifact } from './verify-updater-artifact.mjs';
@@ -35,7 +37,7 @@ const download = (asset) =>
     url.password ||
     url.search ||
     url.hash ||
-    !url.pathname.startsWith(`/${repo}/releases/download/${tag}/`)
+    !url.pathname.startsWith(`/${repo}/releases/download/`)
   )
     throw new Error('Updater URL points to the wrong release.');
   const name = decodeURIComponent(url.pathname.split('/').at(-1));
@@ -43,6 +45,30 @@ const download = (asset) =>
   const signature = release.assets.find((a) => a.name === `${name}.sig` && a.size > 0);
   if (!name.endsWith('.exe') || !installer || !signature)
     throw new Error('Missing NSIS installer/signature. Release remains draft.');
+  const canonicalUrl = `https://github.com/${repo}/releases/download/${tag}/${encodeURIComponent(name)}`;
+  if (target.url !== canonicalUrl) {
+    target.url = canonicalUrl;
+    const dir = mkdtempSync(join(tmpdir(), 'teacher-manifest-'));
+    const path = join(dir, 'latest.json');
+    try {
+      writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
+      gh('api', '--method', 'DELETE', `repos/${repo}/releases/assets/${manifestAsset.id}`);
+      gh(
+        'api',
+        '--method',
+        'POST',
+        '--hostname',
+        'uploads.github.com',
+        `repos/${repo}/releases/${release.id}/assets?name=latest.json`,
+        '-H',
+        'Content-Type: application/json',
+        '--input',
+        path,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
   const signatureText = download(signature).toString('utf8');
   if (signatureText.trim() !== target.signature.trim())
     throw new Error('Uploaded signature differs from manifest.');
